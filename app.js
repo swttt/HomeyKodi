@@ -1,5 +1,4 @@
 "use strict";
-var HomeyKodi = require('./homey_kodi.js');
 
 function init() {	
 	Homey.log("init()");
