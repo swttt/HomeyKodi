@@ -17,6 +17,10 @@
 			"configure": "Configure Kodi",
 			"start_configuration":"Configure!",
 			"configuration_explanation": "Add your Kodi connection details to connect!"		  
+		},
+		"feedback":{
+			"could_not_connect": "Could not connect to your Kodi",
+			"succesfully_connected": "Connection succesfull!"
 		}
 	 }	
 }

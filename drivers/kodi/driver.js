@@ -37,23 +37,23 @@ module.exports.pair = function( socket ) {
     
     // Link the configure function to the front end
 	socket.on("configure_kodi", function(data , callback){
-				
+			
 		//data contains connections data of kodi
-		Xbmc = new Xbmc(data); 
+		var xbmc = new Xbmc(data); 
 		
-		Xbmc.notify("Succesfully connected!", 5000, function (error, result) {
+		xbmc.notify(__("pair.feedback.succesfully_connected"), 5000, function (error, result) {
 		  if (error) {
-			callback(error);
+			callback(__("pair.feedback.could_not_connect"));
 		  }
 		  else {
-			registeredDevices.push(Xbmc);
-			callback(null, "Succesfully connected!");
+			registeredDevices.push(xbmc);
+			callback(null, __("pair.feedback.succesfully_connected"));
 		  }		  
 		});				
 	});
 	    
     socket.on('disconnect', function(){
-        console.log("User aborted pairing, or pairing is finished");
+        //Don't care what happens
     })
 }
 
@@ -65,9 +65,9 @@ module.exports.searchMovie = function(deviceName, movieTitle) {
 		
 		//search Kodi instance by devicename
 		getKodiInstance(deviceName).
-			then(function(Xbmc){
+			then(function(xbmc){
 				//Kodi API: VideoLibrary.GetMovies
-				Xbmc.method('VideoLibrary.GetMovies', '', 
+				xbmc.method('VideoLibrary.GetMovies', '', 
 					function (error, result) {
 						if (error) {
 							return errorFn(error);
@@ -113,7 +113,7 @@ module.exports.playMovie = function(deviceName, movieId) {
 		console.log("playMovie()", deviceName, movieId);
 		//search Kodi instance by devicename		
 		getKodiInstance(deviceName)
-			.then(function(Xbmc){
+			.then(function(xbmc){
 				//Build the parameter to play a movie
 				var param = {
 					item : {
@@ -121,7 +121,7 @@ module.exports.playMovie = function(deviceName, movieId) {
 					}
 				};						
 				
-				Xbmc.method('Player.Open',param,function(error, result){
+				xbmc.method('Player.Open',param,function(error, result){
 					if (error) {
 						errorFn(error);
 					}
