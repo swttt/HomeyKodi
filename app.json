@@ -1,152 +1,182 @@
 {
-    "id": "nl.marvinschenkel.kodi",
-    "name": {
-        "en": "Kodi for Homey"
+  "id": "nl.marvinschenkel.kodi",
+  "name": {
+    "en": "Kodi for Homey"
+  },
+  "description": {
+    "en": "Control your Kodi device with Homey!"
+  },
+  "version": "0.0.1",
+  "compatibility": "0.x || 1.x",
+  "author": {
+    "name": "Marvin Schenkel",
+    "email": "marvinschenkel@gmail.com"
+  },
+  "speech":[
+    {
+      "id": "kodi_play_movie",
+      "importance": 1,
+      "triggers" : {
+        "en" : ["play movie"]
+      }
     },
-    "version": "0.0.1",
-    "compatibility": "0.x || 1.x",
-    "author": {
-        "name": "Marvin Schenkel",
-        "email": "marvinschenkel@gmail.com"
+    {
+      "id": "kodi_play_tvshow",
+      "importance": 1,
+      "triggers" : {
+        "en" : ["play tv show"]
+      }
     },
-	"speech":[
-		{
-			"id": "kodi_play_movie",
-			"importance": 1,
-			"triggers" : {
-				"en" : ["play movie"]				
-			}
-		},
-		{
-			"id": "kodi_play_tvshow",
-			"importance": 1,
-			"triggers" : {
-				"en" : ["play tv show"]				
-			}
-		},
-		{
-			"id": "kodi_play_music",
-			"importance": 1,
-			"triggers" : {
-				"en" : ["play music"]				
-			}
-		}
-	],
-	"drivers": [
-		{
-			"id": "kodi",
-			"name": {
-				"en": "Kodi"
-			},
-			"images": {
-				"large": "./drivers/kodi/assets/images/large.jpg",
-				"small": "./drivers/kodi/assets/images/small.jpg"
-			},
-			"class": "videoplayer",
-			"capabilities": [ "play", "pause", "stop" ],
-			"pair": [				
-				{
-					"id": "configure_kodi"					
-				}
-				,
-				{
-					"id": "add_kodis",
-					"template": "add_devices"
-				}
-			],
-			"settings": [
-                {
-                    "type": "group",
-                    "label": {
-                        "en": "Kodi settings"
-                    },
-                    "children": [
-                        {
-                            "id": "host",
-                            "type": "text",
-                            "label": {
-                                "en": "(Local) IP Address of Kodi"
-                            }
-                        },
-                        {
-                            "id": "http_port",
-                            "type": "number",
-                            "label": {
-                                "en": "Port number"
-                            }                         
-                        },
-                        {
-                            "id": "username",
-                            "type": "text",
-                            "label": {
-                                "en": "User name"
-                            }
-                        },
-                        {
-                            "id": "password",
-                            "type": "text",
-                            "label": {
-                                "en": "Password"
-                            }
-                        }
-						
-                    ]
-                }
-			]
-		}
-	],
-	"images":{
-      "large":"./assets/kodi_large.png",
-      "small":"./assets/kodi_small.png"
-	},	
-	"flow":	{
-		"triggers":[
-			{
-				"id":"kodi_movie_start",
-				"title": {
-					"en":"A movie has started"
-				},
-				"tokens":[
-					{
-						"name":"movie_title",
-						"title": {
-							"en":"title"
-						},
-						"example":{
-							"en":"Finding Nemo"
-						}
-					}
-				]
-			}
-		],
-		"actions":[
-			{
-				"id": "playMovieKodi",
-				"title": {
-					"en" : "Play a movie on Kodi"
-				},
-				"fluidArgs": true,
-				"args":[
-					{
-						"name": "kodi",
-						"type": "device",
-						"filter": "driver_uri=homey:app:nl.marvinschenkel.kodi&driver_id=kodi"
-					},
-					{
-						"name": "movie_title",
-						"type": "text",
-						"placeholder" : {
-							"en" : "Type a movie title that's in your library"
-						}
-					}
-				]
-			}
-		]
-	}	
-	,
-	"permissions": [
-		"homey:manager:speech-output",
-		"homey:manager:speech-input",
-		"homey:manager:ledring"
-	]
+    {
+      "id": "kodi_play_music",
+      "importance": 1,
+      "triggers" : {
+        "en" : ["play music"]
+      }
+    },
+    {
+      "id": "kodi_play_pause",
+      "importance": 1,
+      "triggers" : {
+        "en" : ["pause", "resume"]
+      }
+    }
+  ],
+  "drivers": [
+    {
+      "id": "kodi",
+      "name": {
+        "en": "Kodi"
+      },
+      "images": {
+        "large": "./drivers/kodi/assets/images/large.jpg",
+        "small": "./drivers/kodi/assets/images/small.jpg"
+      },
+      "class": "videoplayer",
+      "capabilities": [ "play", "pause", "stop" ],
+      "pair": [
+        {
+          "id": "configure_kodi"
+        }
+        ,
+        {
+          "id": "add_kodis",
+          "template": "add_devices"
+        }
+      ],
+      "settings": [
+        {
+          "type": "group",
+          "label": {
+            "en": "Kodi settings"
+          },
+          "children": [
+            {
+              "id": "host",
+              "type": "text",
+              "label": {
+                "en": "(Local) IP Address of Kodi"
+              }
+            },
+            {
+              "id": "http_port",
+              "type": "number",
+              "label": {
+                "en": "Port number"
+              }
+            },
+            {
+              "id": "username",
+              "type": "text",
+              "label": {
+                "en": "User name"
+              }
+            },
+            {
+              "id": "password",
+              "type": "text",
+              "label": {
+                "en": "Password"
+              }
+            }
+
+          ]
+        }
+      ]
+    }
+  ],
+  "images":{
+    "large":"./assets/kodi_large.png",
+    "small":"./assets/kodi_small.png"
+  },
+  "flow":	{
+    "triggers":[
+      {
+        "id":"kodi_movie_start",
+        "title": {
+          "en":"A movie has started"
+        },
+        "tokens":[
+          {
+            "name":"movie_title",
+            "title": {
+              "en":"title"
+            },
+            "example":{
+              "en":"Finding Nemo"
+            }
+          }
+        ]
+      },
+      {
+        "id":"kodi_pause_resume",
+        "title": {
+          "en":"Kodi has been paused / resumed"
+        }
+      }
+    ],
+    "actions":[
+      {
+        "id": "playMovieKodi",
+        "title": {
+          "en" : "Play a movie on Kodi"
+        },
+        "fluidArgs": true,
+        "args":[
+          {
+            "name": "kodi",
+            "type": "device",
+            "filter": "driver_uri=homey:app:nl.marvinschenkel.kodi&driver_id=kodi"
+          },
+          {
+            "name": "movie_title",
+            "type": "text",
+            "placeholder" : {
+              "en" : "Type a movie title that's in your library"
+            }
+          }
+        ]
+      },
+      {
+        "id": "pauseResumeMovieKodi",
+        "title": {
+          "en" : "Pause / resume playback on Kodi"
+        },
+        "fluidArgs": true,
+        "args":[
+          {
+            "name": "kodi",
+            "type": "device",
+            "filter": "driver_uri=homey:app:nl.marvinschenkel.kodi&driver_id=kodi"
+          }
+        ]
+      }
+    ]
+  }
+  ,
+  "permissions": [
+    "homey:manager:speech-output",
+    "homey:manager:speech-input",
+    "homey:manager:ledring"
+  ]
 }
