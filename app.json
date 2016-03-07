@@ -156,7 +156,7 @@
     ],
     "actions":[
       {
-        "id": "playMovieKodi",
+        "id": "play_movie_kodi",
         "title": {
           "en" : "Play a movie on Kodi"
         },
@@ -177,9 +177,23 @@
         ]
       },
       {
-        "id": "pauseResumeMovieKodi",
+        "id": "pause_resume_kodi",
         "title": {
           "en" : "Pause / resume playback on Kodi"
+        },
+        "fluidArgs": true,
+        "args":[
+          {
+            "name": "kodi",
+            "type": "device",
+            "filter": "driver_uri=homey:app:nl.marvinschenkel.kodi&driver_id=kodi"
+          }
+        ]
+      },
+      {
+        "id": "stop_kodi",
+        "title": {
+          "en" : "Stop playback on Kodi"
         },
         "fluidArgs": true,
         "args":[

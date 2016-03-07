@@ -7,8 +7,9 @@ function init () {
 
   // Register functions
   Homey.manager('speech-input').on('speech', parseSpeach)
-  Homey.manager('flow').on('action.playMovieKodi', onFlowActionPlayMovieKodi)
-  Homey.manager('flow').on('action.pauseResumeMovieKodi', onFlowActionPauseResumeKodi)
+  Homey.manager('flow').on('action.play_movie_kodi', onFlowActionPlayMovieKodi)
+  Homey.manager('flow').on('action.pause_resume_kodi', onFlowActionPauseResumeKodi)
+  Homey.manager('flow').on('action.stop_kodi', onFlowActionStopKodi)
 }
 module.exports.init = init
 
@@ -114,6 +115,12 @@ function onFlowActionPauseResumeKodi (callback, args) {
     .catch(console.error)
 }
 
+function onFlowActionStopKodi (callback, args) {
+  Homey.log('onFlowActionStopKodi()', args)
+  Homey.manager('drivers').getDriver('kodi').stop(args.id)
+    .then(callback)
+    .catch(console.error)
+}
 /* ******************
 	COMMON FUNCTIONS
 ********************/
