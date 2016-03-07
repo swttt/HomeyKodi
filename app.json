@@ -40,6 +40,13 @@
       "triggers" : {
         "en" : ["pause", "resume"]
       }
+    },
+    {
+      "id": "kodi_stop",
+      "importance": 0.7,
+      "triggers" : {
+        "en" : ["stop", "exit", "quit"]
+      }
     }
   ],
   "drivers": [
@@ -129,9 +136,21 @@
         ]
       },
       {
-        "id":"kodi_pause_resume",
+        "id":"kodi_pause",
         "title": {
-          "en":"Kodi has been paused / resumed"
+          "en":"Kodi has been paused"
+        }
+      },
+      {
+        "id":"kodi_resume",
+        "title": {
+          "en":"Kodi has been resumed"
+        }
+      },
+      {
+        "id":"kodi_stop",
+        "title": {
+          "en":"Kodi has been stopped"
         }
       }
     ],

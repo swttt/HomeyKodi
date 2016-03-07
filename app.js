@@ -61,9 +61,14 @@ function parseSpeach (speech, callback) {
 
       case 'kodi_play_pause' :
         Homey.manager('drivers').getDriver('kodi').playPause(null)
-          .then(function () {
-            Homey.log('Triggering flow kodi_pause_resume')
-            Homey.manager('flow').trigger('kodi_pause_resume')
+          .then(function (newState) {
+            if (newState === 'paused') {
+              Homey.log('Triggering flow kodi_pause')
+              Homey.manager('flow').trigger('kodi_pause')
+            } else {
+              Homey.log('Triggering flow kodi_resume')
+              Homey.manager('flow').trigger('kodi_resume')
+            }
           })
           .catch(
             function (err) {
@@ -71,7 +76,21 @@ function parseSpeach (speech, callback) {
               Homey.manager('speech-output').say(err)
             }
         )
-        return true
+        return true // Only fire one trigger
+
+      case 'kodi_stop' :
+        Homey.manager('drivers').getDriver('kodi').stop(null)
+        .then(function () {          
+          Homey.log('Triggering flow kodi_stop')
+          Homey.manager('flow').trigger('kodi_stop')
+        })
+        .catch(
+          function (err) {
+            // Driver should throw user friendly errors
+            Homey.manager('speech-output').say(err)
+          }
+        )
+        return true // Only fire one trigger
     }
   })
 
@@ -99,7 +118,7 @@ function onFlowActionPauseResumeKodi (callback, args) {
 	COMMON FUNCTIONS
 ********************/
 function searchAndPlayMovie (device, movieTitle) {
-  return new Promise(function (succesFn, errorFn) {
+  return new Promise(function (resolve, reject) {
     Homey.log('searchAndPlayMovie', device, movieTitle)
 
     // Get device from driver and play the movie
@@ -110,8 +129,8 @@ function searchAndPlayMovie (device, movieTitle) {
         // Play movie and trigger flows
         function (movie) {
           KodiDriver.playMovie(device, movie.movieid)
-            .then(succesFn)
-            .catch(errorFn)
+            .then(resolve)
+            .catch(reject)
           Homey.log('Triggering flow kodi_movie_start, movie_title: ', movie.label)
           // Trigger flows and pass variables
           Homey.manager('flow').trigger('kodi_movie_start', {
@@ -119,17 +138,17 @@ function searchAndPlayMovie (device, movieTitle) {
           })
         }
     )
-      .catch(errorFn)
+      .catch(reject)
   })
 }
 
 // queryProperty can be ARTIST or ALBUM
 function searchAndPlayMusic (device, queryProperty, searchQuery) {
-  return new Promise(function (succesFn, errorFn) {
+  return new Promise(function (resolve, reject) {
     Homey.log('searchAndPlayMusic()', device, queryProperty, searchQuery)
     // Get the device from driver and search for music
     var KodiDriver = Homey.manager('drivers').getDriver('kodi')
     KodiDriver.searchMusic(device, queryProperty, searchQuery)
-      .catch(errorFn)
+      .catch(reject)
   })
 }
