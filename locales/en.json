@@ -2,25 +2,29 @@
 	"talkback":{
 		"movie_not_found":"I couldn't find the movie",
 		"device_not_found":"I couldn't find the device",
+    "artist_not_found":"I couldn't find the artist",
+    "album_not_found":"I couldn't find the album",
 		"not_implemented":"I don't know how to do this yet"
-	}	
+	}
 	,
 	"speech": {
 		"play": "play",
 		"movie":"movie",
 		"tv_show":"tv show",
-		"on kodi":"on kodi"
-	}	
+		"on kodi":"on kodi",
+    "artist": "artist",
+    "by": "by"
+	}
 	,
 	"pair": {
 		"authorization": {
 			"configure": "Configure Kodi",
 			"start_configuration":"Configure!",
-			"configuration_explanation": "Add your Kodi connection details to connect!"		  
+			"configuration_explanation": "Add your Kodi connection details to connect!"
 		},
 		"feedback":{
 			"could_not_connect": "Could not connect to your Kodi",
 			"succesfully_connected": "Connection succesfull!"
 		}
-	 }	
+	 }
 }

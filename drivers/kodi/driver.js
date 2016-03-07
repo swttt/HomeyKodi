@@ -10,11 +10,11 @@ var registeredDevices = []
 module.exports.capabilities = {}
 
 module.exports.init = function (devices, callback) {
-	// Initiate a Kodi instance for each registered device
+  // Initiate a Kodi instance for each registered device
   devices.forEach(function (device) {
-		// Build Xbmc objects
-		module.exports.getSettings(device, function (err, settings) {
-			// Parse settings
+    // Build Xbmc objects
+    module.exports.getSettings(device, function (err, settings) {
+      // Parse settings
       var params = {
         host: settings.host,
         httpPort: settings.http_port,
@@ -26,7 +26,7 @@ module.exports.init = function (devices, callback) {
 
       // Register the device
       registeredDevices.push(xbmc)
-		})
+    })
   })
 
   callback()
@@ -34,19 +34,18 @@ module.exports.init = function (devices, callback) {
 
 // Pairing functionality
 module.exports.pair = function (socket) {
-    // Link the configure function to the front end
+  // Link the configure function to the front end
   socket.on('configure_kodi', function (data, callback) {
-	// data contains connections data of kodi
+    // data contains connections data of kodi
     var xbmc = new Xbmc(data)
 
     xbmc.notify(__('pair.feedback.succesfully_connected'), 5000, function (error, result) {
       if (error) {
         callback(__('pair.feedback.could_not_connect'))
-      }
-      else {
+      } else {
         registeredDevices.push(xbmc)
         callback(null, __('pair.feedback.succesfully_connected'))
-		  }
+      }
     })
   })
 
@@ -61,18 +60,18 @@ module.exports.searchMovie = function (deviceName, movieTitle) {
   return new Promise(function (succesFn, errorFn) {
     console.log('searchMovie()', deviceName, movieTitle)
 
-		// search Kodi instance by devicename
+    // search Kodi instance by devicename
     getKodiInstance(deviceName)
       .then(function (xbmc) {
-			// Kodi API: VideoLibrary.GetMovies
+        // Kodi API: VideoLibrary.GetMovies
         xbmc.method('VideoLibrary.GetMovies', '',
-					function (error, result) {
+          function (error, result) {
             if (error) {
               return errorFn(error)
             }
 
-						// Parse the result and look for movieTitle
-						// Set option for fuzzy search
+            // Parse the result and look for movieTitle
+            // Set option for fuzzy search
             var options = {
               caseSensitive: false, // Don't care about case whenever we're searching titles by speech
               includeScore: false, // Don't need the score, the first item has the highest probability
@@ -84,32 +83,32 @@ module.exports.searchMovie = function (deviceName, movieTitle) {
               keys: ['label']
             }
 
-						// Create the fuzzy search object
+            // Create the fuzzy search object
             var fuse = new Fuse(result.movies, options)
             var searchResult = fuse.search(movieTitle.trim())
 
-						// If there's a result
+            // If there's a result
             if (searchResult.length > 0) {
               succesFn(searchResult[0]) // Always use searchResult[0], this is the result with the highest probability (setting shouldSort = true)
             }
-						// Movie not found
+            // Movie not found
             else {
               errorFn(__('talkback.movie_not_found'))
             }
-				})
+          })
       })
-			.catch(errorFn)
+      .catch(errorFn)
   })
 }
 
 module.exports.playMovie = function (deviceName, movieId) {
-	// Kodi API: Player.Open
+  // Kodi API: Player.Open
   return new Promise(function (succesFn, errorFn) {
     console.log('playMovie()', deviceName, movieId)
-		// search Kodi instance by devicename
+    // search Kodi instance by devicename
     getKodiInstance(deviceName)
-			.then(function (xbmc) {
-				// Build the parameter to play a movie
+      .then(function (xbmc) {
+        // Build the parameter to play a movie
         var param = {
           item: {
             movieid: movieId
@@ -121,19 +120,19 @@ module.exports.playMovie = function (deviceName, movieId) {
             errorFn(error)
           }
 
-					// Movie started succesfully
+          // Movie started succesfully
           succesFn()
         })
-			})
+      })
       .catch(errorFn)
   })
 }
 
 module.exports.playPause = function (deviceName) {
-	// Kodi API: Player.Open
+  // Kodi API: Player.Open
   return new Promise(function (succesFn, errorFn) {
     console.log('playPause()', deviceName)
-		// search Kodi instance by devicename
+    // search Kodi instance by devicename
     getKodiInstance(deviceName)
       .then(function (xbmc) {
         // Get the active player so we can pause it
@@ -159,18 +158,100 @@ module.exports.playPause = function (deviceName) {
   })
 }
 
+module.exports.searchMusic = function (deviceName, queryProperty, searchQuery) {
+  return new Promise(function (succesFn, errorFn) {
+    console.log('searchMusic()', deviceName, queryProperty, searchQuery)
+
+    // search Kodi instance by devicename
+    getKodiInstance(deviceName)
+      .then(function (xbmc) {
+        // Determine whether to search by artist or ALBUM
+        var searchMethod = ''
+        var fuzzyLookupKey = ''
+        switch (queryProperty) {
+          case 'ARTIST':
+            searchMethod = 'AudioLibrary.GetArtists'
+            fuzzyLookupKey = 'artist'
+            break
+          case 'ALBUM' :
+            searchMethod = 'AudioLibrary.GetAlbums'
+            break
+        }
+        // Call kodi for artist / albums
+        xbmc.method(searchMethod, '',
+          function (error, result) {
+            if (error) {
+              return errorFn(error)
+            }
+
+            // Parse the result and look for artist or album
+            // Set option for fuzzy search
+            var options = {
+              caseSensitive: false, // Don't care about case whenever we're searching titles by speech
+              includeScore: false, // Don't need the score, the first item has the highest probability
+              shouldSort: true, // Should be true, since we want result[0] to be the item with the highest probability
+              threshold: 0.4, // 0 = perfect match, 1 = match all..
+              location: 0,
+              distance: 100,
+              maxPatternLength: 64,
+              keys: [fuzzyLookupKey] // Set to either 'artist' or 'album'
+            }
+
+            // Create the fuzzy search object
+            var fuse = new Fuse(result[fuzzyLookupKey + 's'], options) // + 's' since the root tag is always plural (artistS and albumS)
+            var searchResult = fuse.search(searchQuery.trim())
+
+            // If there's a result
+            if (searchResult.length > 0) {
+              var artistOrAlbum = searchResult[0] // Always use searchResult[0], this is the result with the highest probability (setting shouldSort = true)
+
+              // Build parameter filter to obtain filtered songs
+              var params = {
+                filter: {
+                  field: fuzzyLookupKey + 'id', // artistid or albumid
+                  operator: 'equals',
+                  value: artistOrAlbum.artistid
+                }
+              }
+              console.log(params)
+              // Call Kodi for songs by artist/albums
+              xbmc.method('AudioLibrary.GetSongs', params,
+                function (error, result) {
+                  console.log(result)
+                  console.log(error)
+                  if (error) {
+                    return errorFn(error)
+                  }
+                }
+              )
+            }
+            // Artist/Album not found
+            else {
+              switch (queryProperty) {
+                case 'ARTIST':
+                  errorFn(__('talkback.artist_not_found'))
+                  break
+                case 'ALBUM' :
+                  errorFn(__('talkback.album_not_found'))
+                  break
+              }
+            }
+          })
+      })
+      .catch(errorFn)
+  })
+}
 // Return the Kodi device by device name or id
 function getKodiInstance (deviceId) {
   return new Promise(function (succesFn, errorFn) {
     console.log('getKodiInstance', deviceId)
     // If only 1 registered device, just return it
-		// @TODO fix multiple devices support
+    // @TODO fix multiple devices support
     var device = registeredDevices.length === 1 ? registeredDevices[0] : registeredDevices[deviceId]
 
     if (device) {
       succesFn(device)
-    }
-    else {
+    } else {
       errorFn(__('talkback.device_not_found'))
     }
   })
