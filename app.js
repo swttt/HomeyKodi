@@ -156,6 +156,12 @@ function searchAndPlayMusic (device, queryProperty, searchQuery) {
     // Get the device from driver and search for music
     var KodiDriver = Homey.manager('drivers').getDriver('kodi')
     KodiDriver.searchMusic(device, queryProperty, searchQuery)
+      .then(
+        function (songsToPlay) {
+          KodiDriver.playMusic(device, songsToPlay)
+          .catch(reject)
+        }
+      )
       .catch(reject)
   })
 }

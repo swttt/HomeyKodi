@@ -1,4 +1,3 @@
-/* global __ */
 'use strict'
 
 // Require dependencies
@@ -283,6 +282,76 @@ module.exports.searchMusic = function (deviceName, queryProperty, searchQuery) {
           })
       })
       .catch(reject)
+  })
+}
+
+/* **********************************
+  PLAY MUSIC
+************************************/
+/*
+  - Clears playlist
+  - Adds songs
+  - Starts playing
+*/
+module.exports.playMusic = function (deviceName, songsToPlay) {
+  return new Promise(function (resolve, reject) {
+    console.log('playMusic()', deviceName, songsToPlay)
+
+    // search Kodi instance by devicename
+    getKodiInstance(deviceName)
+      .then(function (xbmc) {
+        // Clear the playlist
+        var params = {
+          playlistid: 0
+        }
+        xbmc.method('Playlist.Clear', params,
+          function (error, result) {
+            if (error) {
+              return reject(error)
+            }
+
+            // Create an array of songids
+            var songs = songsToPlay.map(function (item) {
+              return {songid: item.songid}
+            })
+
+            var params = {
+              playlistid: 0,
+              item: songs
+            }
+            // Add the songs to the playlist
+            xbmc.method('Playlist.Add', params,
+              function (error, result) {
+                if (error) {
+                  return reject(error)
+                }
+
+                // Play the playlist
+                var params = {
+                  item: {
+                    playlistid: 0
+                  },
+                  options: {
+                    repeat: 'all'
+                  }
+                }
+
+                xbmc.method('Player.Open', params,
+                  function (error, result) {
+                    console.log(error)
+                    if (error) {
+                      return reject(error)
+                    } else {
+                      // Succesfully played the playlist
+                      resolve()
+                    }
+                  }
+                )
+              }
+            )
+          }
+        )
+      })
   })
 }
 
