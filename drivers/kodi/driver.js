@@ -60,7 +60,7 @@ module.exports.pair = function (socket) {
 }
 
 // Device gets deleted
-module.exports.deleted = function (device_data) {  
+module.exports.deleted = function (device_data) {
   // Create a new array without the deleted device
   registeredDevices = registeredDevices.filter(function (item) {
     return item.host !== device_data.id
