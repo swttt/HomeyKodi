@@ -6,8 +6,12 @@
   "description": {
     "en": "Control your Kodi device with Homey!"
   },
-  "version": "0.0.1",
+  "version": "1.0.0",
   "compatibility": "0.x || 1.x",
+  "category": [
+    "music",
+    "video"
+  ],
   "author": {
     "name": "Marvin Schenkel",
     "email": "marvinschenkel@gmail.com"
@@ -47,6 +51,27 @@
       "triggers" : {
         "en" : ["stop", "exit", "quit"]
       }
+    },
+    {
+      "id": "kodi_next",
+      "importance": 0.7,
+      "triggers": {
+        "en" : ["next track"]
+      }
+    },
+    {
+      "id": "kodi_previous",
+      "importance": 0.7,
+      "triggers": {
+        "en" : ["previous track"]
+      }
+    },
+    {
+       "id": "kodi_play_latest_episode",
+       "importance": 1,
+       "triggers": {
+         "en": ["play latest episode of", "play the latest episode of", "play latest episode", "play latest episode of"]
+       }
     }
   ],
   "drivers": [
@@ -56,8 +81,8 @@
         "en": "Kodi"
       },
       "images": {
-        "large": "./drivers/kodi/assets/images/large.jpg",
-        "small": "./drivers/kodi/assets/images/small.jpg"
+        "large": "./drivers/kodi/assets/images/large.png",
+        "small": "./drivers/kodi/assets/images/small.png"
       },
       "class": "videoplayer",
       "capabilities": [ "play", "pause", "stop" ],
@@ -113,8 +138,8 @@
     }
   ],
   "images":{
-    "large":"./assets/kodi_large.png",
-    "small":"./assets/kodi_small.png"
+    "large":"./assets/images/large.png",
+    "small":"./assets/images/small.png"
   },
   "flow":	{
     "triggers":[
@@ -131,6 +156,50 @@
             },
             "example":{
               "en":"Finding Nemo"
+            }
+          }
+        ]
+      },
+      {
+        "id":"kodi_episode_start",
+        "title": {
+          "en":"An episode has started"
+        },
+        "tokens":[
+          {
+            "name":"tvshow_title",
+            "title": {
+              "en":"Show"
+            },
+            "example":{
+              "en":"The Walking Dead"
+            }
+          },
+          {
+            "name":"episode_title",
+            "title": {
+              "en":"Episode"
+            },
+            "example":{
+              "en":"First Time Again"
+            }
+          },
+          {
+            "name":"season",
+            "title": {
+              "en":"Sea #"
+            },
+            "example":{
+              "en":"1"
+            }
+          },
+          {
+            "name":"episode",
+            "title": {
+              "en":"Ep #"
+            },
+            "example":{
+              "en":"2"
             }
           }
         ]

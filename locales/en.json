@@ -4,7 +4,10 @@
 		"device_not_found":"I couldn't find the device",
     "artist_not_found":"I couldn't find the artist",
     "album_not_found":"I couldn't find the album",
-		"not_implemented":"I don't know how to do this yet"
+		"not_implemented":"I don't know how to do this yet",
+    "series_not_found":"I couldn't find the tv show you were looking for",
+    "no_latest_episode_found":"You have already seen every episode of this tv show!",
+    "something_went_wrong": "Oops! Something went wrong"
 	}
 	,
 	"speech": {
@@ -13,18 +16,19 @@
 		"tv_show":"tv show",
 		"on kodi":"on kodi",
     "artist": "artist",
-    "by": "by"
+    "by": "by",
+    "on":"on"
 	}
 	,
 	"pair": {
 		"authorization": {
 			"configure": "Configure Kodi",
 			"start_configuration":"Configure!",
-			"configuration_explanation": "Add your Kodi connection details to connect!"
+			"configuration_explanation": "Add your Kodi connection details to connect! <br />These can be found under System > Settings > System > Services > Web server on your Kodi device."
 		},
 		"feedback":{
-			"could_not_connect": "Could not connect to your Kodi",
-			"succesfully_connected": "Connection succesfull!"
+			"could_not_connect": "Could not connect to your Kodi! Please verify your details.",
+			"succesfully_connected": "Connection succesful!"
 		}
 	 }
 }

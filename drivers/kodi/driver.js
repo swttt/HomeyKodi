@@ -3,6 +3,7 @@
 // Require dependencies
 var Xbmc = require('xbmc-listener')
 var Fuse = require('fuse.js')
+var Utils = require('../../libs/utils')
 
 var registeredDevices = []
 
@@ -55,6 +56,14 @@ module.exports.pair = function (socket) {
 
   socket.on('disconnect', function () {
     // Don't care what happens
+  })
+}
+
+// Device gets deleted
+module.exports.deleted = function (device_data) {  
+  // Create a new array without the deleted device
+  registeredDevices = registeredDevices.filter(function (item) {
+    return item.host !== device_data.id
   })
 }
 
@@ -230,7 +239,7 @@ module.exports.searchMusic = function (deviceName, queryProperty, searchQuery) {
         xbmc.method(searchMethod, '',
           function (error, result) {
             if (error) {
-              return reject(error)
+              reject(error)
             }
 
             // Parse the result and look for artist or album
@@ -293,7 +302,7 @@ module.exports.searchMusic = function (deviceName, queryProperty, searchQuery) {
   - Adds songs
   - Starts playing
 */
-module.exports.playMusic = function (deviceName, songsToPlay) {
+module.exports.playMusic = function (deviceName, songsToPlay, shuffle) {
   return new Promise(function (resolve, reject) {
     console.log('playMusic()', deviceName, songsToPlay)
 
@@ -307,13 +316,18 @@ module.exports.playMusic = function (deviceName, songsToPlay) {
         xbmc.method('Playlist.Clear', params,
           function (error, result) {
             if (error) {
-              return reject(error)
+              reject(error)
             }
 
             // Create an array of songids
             var songs = songsToPlay.map(function (item) {
               return {songid: item.songid}
             })
+
+            // Shuffle the array
+            if (shuffle) {
+              songs = Utils.shuffle(songs)
+            }
 
             var params = {
               playlistid: 0,
@@ -323,7 +337,7 @@ module.exports.playMusic = function (deviceName, songsToPlay) {
             xbmc.method('Playlist.Add', params,
               function (error, result) {
                 if (error) {
-                  return reject(error)
+                  reject(error)
                 }
 
                 // Play the playlist
@@ -340,7 +354,7 @@ module.exports.playMusic = function (deviceName, songsToPlay) {
                   function (error, result) {
                     console.log(error)
                     if (error) {
-                      return reject(error)
+                      reject(error)
                     } else {
                       // Succesfully played the playlist
                       resolve()
@@ -352,6 +366,142 @@ module.exports.playMusic = function (deviceName, songsToPlay) {
           }
         )
       })
+  })
+}
+
+/* **********************************
+  NEXT / PREVIOUS TRACK
+************************************/
+module.exports.nextOrPreviousTrack = function (deviceName, previousOrNext) {
+  return new Promise(function (resolve, reject) {
+    console.log('nextOrPreviousTrack()', deviceName, previousOrNext)
+
+    // search Kodi instance by devicename
+    getKodiInstance(deviceName)
+      .then(function (xbmc) {
+        // Get the active player so we can next/previous it
+        xbmc.method('Player.GetActivePlayers', {}, function (error, result) {
+          if (error) {
+            reject(error)
+          }
+
+          // Build request parameters and supply the player
+          var params = {
+            playerid: result[0].playerid,
+            to: previousOrNext
+          }
+
+          xbmc.method('Player.GoTo', params,
+            function (error, result) {
+              if (error) {
+                reject(error)
+              } else {
+                resolve(previousOrNext)
+              }
+            }
+          )
+        })
+      })
+  })
+}
+
+/* **********************************
+  SEARCH LATEST EPISODE
+************************************/
+module.exports.getLatestEpisode = function (deviceName, seriesName) {
+  return new Promise(function (resolve, reject) {
+    console.log('getLatestEpisode()', deviceName, seriesName)
+
+    // search Kodi instance by devicename
+    getKodiInstance(deviceName)
+      .then(function (xbmc) {
+        // Get all the series and fuzzy search for the one we need
+        xbmc.method('VideoLibrary.GetTVShows', {},
+          function (error, result) {
+            if (error) {
+              return reject(error)
+            }
+
+            // Parse the result and look for movieTitle
+            // Set option for fuzzy search
+            var options = {
+              caseSensitive: false, // Don't care about case whenever we're searching titles by speech
+              includeScore: false, // Don't need the score, the first item has the highest probability
+              shouldSort: true, // Should be true, since we want result[0] to be the item with the highest probability
+              threshold: 0.4, // 0 = perfect match, 1 = match all..
+              location: 0,
+              distance: 100,
+              maxPatternLength: 64,
+              keys: ['label']
+            }
+
+            // Create the fuzzy search object
+            var fuse = new Fuse(result.tvshows, options)
+            var searchResult = fuse.search(seriesName.trim())
+
+            // If there's a result
+            if (searchResult.length > 0) {
+              // e.g. { label: 'Narcos', tvshowid: 43 }
+              var seriesResult = searchResult[0] // Always use searchResult[0], this is the result with the highest probability (setting shouldSort = true)
+
+              // Build filter to search unwatched episodes
+              var param = {
+                tvshowid: seriesResult.tvshowid,
+                properties: ['playcount', 'showtitle', 'season', 'episode']
+              }
+              xbmc.method('VideoLibrary.GetEpisodes', param,
+                function (error, result) {
+                  if (error) {
+                    reject(error)
+                  }
+
+                  // Check whether we have seen this episode already
+                  var firstUnplayedEpisode = result.episodes.filter(function (item) {
+                    return item.playcount === 0
+                  })
+                  if (firstUnplayedEpisode.length > 0) {
+                    resolve(firstUnplayedEpisode[0]) // Resolve the first unplayed episode
+                  } else {
+                    reject(__('talkback.no_latest_episode_found'))
+                  }
+                }
+              )
+            } else {
+              reject(__('talkback.series_not_found'))
+            }
+          }
+        )
+      })
+  })
+}
+
+/* **********************************
+  PLAY EPISODE
+************************************/
+module.exports.playEpisode = function (deviceName, episode) {
+  // Kodi API: Player.Open
+  return new Promise(function (resolve, reject) {
+    console.log('playEpisode()', deviceName, episode)
+    // search Kodi instance by devicename
+    getKodiInstance(deviceName)
+      .then(function (xbmc) {
+        // Build the parameter to play a movie
+        var param = {
+          item: {
+            episodeid: episode.episodeid
+          }
+        }
+
+        xbmc.method('Player.Open', param, function (error, result) {
+          if (error) {
+            reject(__('talkback.something_went_wrong'))
+          }
+
+          // Episode started playing succesfully
+          resolve()
+        })
+      })
+      .catch(reject)
   })
 }
 
