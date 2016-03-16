@@ -7,6 +7,9 @@
 		"not_implemented":"I don't know how to do this yet",
     "series_not_found":"I couldn't find the tv show you were looking for",
     "no_latest_episode_found":"You have already seen every episode of this tv show!",
+    "no_movies_in_library": "There are no movies in your library, please add them first.",
+    "no_tvshows_in_library": "There are no TV shows in your library, please add them first.",
+    "no_music_in_library": "There is no music in your library, please add it first.",
     "something_went_wrong": "Oops! Something went wrong"
 	}
 	,

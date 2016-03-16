@@ -85,30 +85,33 @@ module.exports.searchMovie = function (deviceName, movieTitle) {
           function (error, result) {
             if (error) {
               return reject(error)
-            }
+            } else if (result.movies) { // Check if there are movies in the media library
+              // Parse the result and look for movieTitle
+              // Set option for fuzzy search
+              var options = {
+                caseSensitive: false, // Don't care about case whenever we're searching titles by speech
+                includeScore: false, // Don't need the score, the first item has the highest probability
+                shouldSort: true, // Should be true, since we want result[0] to be the item with the highest probability
+                threshold: 0.4, // 0 = perfect match, 1 = match all..
+                location: 0,
+                distance: 100,
+                maxPatternLength: 64,
+                keys: ['label']
+              }
 
-            // Parse the result and look for movieTitle
-            // Set option for fuzzy search
-            var options = {
-              caseSensitive: false, // Don't care about case whenever we're searching titles by speech
-              includeScore: false, // Don't need the score, the first item has the highest probability
-              shouldSort: true, // Should be true, since we want result[0] to be the item with the highest probability
-              threshold: 0.4, // 0 = perfect match, 1 = match all..
-              location: 0,
-              distance: 100,
-              maxPatternLength: 64,
-              keys: ['label']
-            }
+              // Create the fuzzy search object
+              var fuse = new Fuse(result.movies, options)
+              var searchResult = fuse.search(movieTitle.trim())
 
-            // Create the fuzzy search object
-            var fuse = new Fuse(result.movies, options)
-            var searchResult = fuse.search(movieTitle.trim())
-
-            // If there's a result
-            if (searchResult.length > 0) {
-              resolve(searchResult[0]) // Always use searchResult[0], this is the result with the highest probability (setting shouldSort = true)
+              // If there's a result
+              if (searchResult.length > 0) {
+                resolve(searchResult[0]) // Always use searchResult[0], this is the result with the highest probability (setting shouldSort = true)
+              } else {
+                reject(__('talkback.movie_not_found'))
+              }
             } else {
-              reject(__('talkback.movie_not_found'))
+              // No movies in media libary, throw an error
+              reject(__('talkback.no_movies_in_library')) 
             }
           })
       })
@@ -194,19 +197,19 @@ module.exports.stop = function (deviceName) {
         xbmc.method('Player.GetActivePlayers', {}, function (error, result) {
           if (error) {
             reject(error)
-          }
-
-          // Build request parameters and supply the player
-          var param = {
-            playerid: result[0].playerid
-          }
-
-          xbmc.method('Player.Stop', param, function (error, result) {
-            if (error) {
-              reject(error)
+          } else if (result[0]) { // Check whether there is an active player to stop
+            // Build request parameters and supply the player
+            var param = {
+              playerid: result[0].playerid
             }
-            resolve()
-          })
+
+            xbmc.method('Player.Stop', param, function (error, result) {
+              if (error) {
+                reject(error)
+              }
+              resolve()
+            })
+          }
         })
       })
       .catch(reject)
@@ -240,53 +243,56 @@ module.exports.searchMusic = function (deviceName, queryProperty, searchQuery) {
           function (error, result) {
             if (error) {
               reject(error)
-            }
-
-            // Parse the result and look for artist or album
-            // Set option for fuzzy search
-            var options = {
-              caseSensitive: false, // Don't care about case whenever we're searching titles by speech
-              includeScore: false, // Don't need the score, the first item has the highest probability
-              shouldSort: true, // Should be true, since we want result[0] to be the item with the highest probability
-              threshold: 0.4, // 0 = perfect match, 1 = match all..
-              location: 0,
-              distance: 100,
-              maxPatternLength: 64,
-              keys: [fuzzyLookupKey] // Set to either 'artist' or 'album'
-            }
-
-            // Create the fuzzy search object
-            var fuse = new Fuse(result[fuzzyLookupKey + 's'], options) // + 's' since the root tag is always plural (artistS and albumS)
-            var searchResult = fuse.search(searchQuery.trim())
-
-            // If there's a result
-            if (searchResult.length > 0) {
-              var artistOrAlbum = searchResult[0] // Always use searchResult[0], this is the result with the highest probability (setting shouldSort = true)
-
-              // Build parameter filter to obtain filtered songs
-              var params = { filter: {} }
-              params.filter[fuzzyLookupKey + 'id'] = artistOrAlbum.artistid
-
-              // Call Kodi for songs by artist/albums
-              xbmc.method('AudioLibrary.GetSongs', params,
-                function (error, result) {
-                  if (error) {
-                    reject(error)
-                  }
-                  // Return the array of songs
-                  resolve(result.songs)
-                }
-              )
-            } else {
-              // Artist/Album not found
-              switch (queryProperty) {
-                case 'ARTIST':
-                  reject(__('talkback.artist_not_found'))
-                  break
-                case 'ALBUM' :
-                  reject(__('talkback.album_not_found'))
-                  break
+            } else if (result[fuzzyLookupKey + 's']) { // Check if there is music in the library
+              // Parse the result and look for artist or album
+              // Set option for fuzzy search
+              var options = {
+                caseSensitive: false, // Don't care about case whenever we're searching titles by speech
+                includeScore: false, // Don't need the score, the first item has the highest probability
+                shouldSort: true, // Should be true, since we want result[0] to be the item with the highest probability
+                threshold: 0.4, // 0 = perfect match, 1 = match all..
+                location: 0,
+                distance: 100,
+                maxPatternLength: 64,
+                keys: [fuzzyLookupKey] // Set to either 'artist' or 'album'
               }
+
+              // Create the fuzzy search object
+              var fuse = new Fuse(result[fuzzyLookupKey + 's'], options) // + 's' since the root tag is always plural (artistS and albumS)
+              var searchResult = fuse.search(searchQuery.trim())
+
+              // If there's a result
+              if (searchResult.length > 0) {
+                var artistOrAlbum = searchResult[0] // Always use searchResult[0], this is the result with the highest probability (setting shouldSort = true)
+
+                // Build parameter filter to obtain filtered songs
+                var params = { filter: {} }
+                params.filter[fuzzyLookupKey + 'id'] = artistOrAlbum.artistid
+
+                // Call Kodi for songs by artist/albums
+                xbmc.method('AudioLibrary.GetSongs', params,
+                  function (error, result) {
+                    if (error) {
+                      reject(error)
+                    }
+                    // Return the array of songs
+                    resolve(result.songs)
+                  }
+                )
+              } else {
+                // Artist/Album not found
+                switch (queryProperty) {
+                  case 'ARTIST':
+                    reject(__('talkback.artist_not_found'))
+                    break
+                  case 'ALBUM' :
+                    reject(__('talkback.album_not_found'))
+                    break
+                }
+              }
+            } else {
+              // No music in library
+              reject(__('talkback.no_music_in_library'))
             }
           })
       })
@@ -383,23 +389,23 @@ module.exports.nextOrPreviousTrack = function (deviceName, previousOrNext) {
         xbmc.method('Player.GetActivePlayers', {}, function (error, result) {
           if (error) {
             reject(error)
-          }
-
-          // Build request parameters and supply the player
-          var params = {
-            playerid: result[0].playerid,
-            to: previousOrNext
-          }
-
-          xbmc.method('Player.GoTo', params,
-            function (error, result) {
-              if (error) {
-                reject(error)
-              } else {
-                resolve(previousOrNext)
-              }
+          } else if (result[0]) { // Check whether there is an active player to stop
+            // Build request parameters and supply the player
+            var params = {
+              playerid: result[0].playerid,
+              to: previousOrNext
             }
-          )
+
+            xbmc.method('Player.GoTo', params,
+              function (error, result) {
+                if (error) {
+                  reject(error)
+                } else {
+                  resolve(previousOrNext)
+                }
+              }
+            )
+          }
         })
       })
   })
@@ -420,54 +426,57 @@ module.exports.getLatestEpisode = function (deviceName, seriesName) {
           function (error, result) {
             if (error) {
               return reject(error)
-            }
-
-            // Parse the result and look for movieTitle
-            // Set option for fuzzy search
-            var options = {
-              caseSensitive: false, // Don't care about case whenever we're searching titles by speech
-              includeScore: false, // Don't need the score, the first item has the highest probability
-              shouldSort: true, // Should be true, since we want result[0] to be the item with the highest probability
-              threshold: 0.4, // 0 = perfect match, 1 = match all..
-              location: 0,
-              distance: 100,
-              maxPatternLength: 64,
-              keys: ['label']
-            }
-
-            // Create the fuzzy search object
-            var fuse = new Fuse(result.tvshows, options)
-            var searchResult = fuse.search(seriesName.trim())
-
-            // If there's a result
-            if (searchResult.length > 0) {
-              // e.g. { label: 'Narcos', tvshowid: 43 }
-              var seriesResult = searchResult[0] // Always use searchResult[0], this is the result with the highest probability (setting shouldSort = true)
-
-              // Build filter to search unwatched episodes
-              var param = {
-                tvshowid: seriesResult.tvshowid,
-                properties: ['playcount', 'showtitle', 'season', 'episode']
+            } else if (result.tvshows) { // Check whether there are TV shows in the library
+              // Parse the result and look for movieTitle
+              // Set option for fuzzy search
+              var options = {
+                caseSensitive: false, // Don't care about case whenever we're searching titles by speech
+                includeScore: false, // Don't need the score, the first item has the highest probability
+                shouldSort: true, // Should be true, since we want result[0] to be the item with the highest probability
+                threshold: 0.4, // 0 = perfect match, 1 = match all..
+                location: 0,
+                distance: 100,
+                maxPatternLength: 64,
+                keys: ['label']
               }
-              xbmc.method('VideoLibrary.GetEpisodes', param,
-                function (error, result) {
-                  if (error) {
-                    reject(error)
-                  }
 
-                  // Check whether we have seen this episode already
-                  var firstUnplayedEpisode = result.episodes.filter(function (item) {
-                    return item.playcount === 0
-                  })
-                  if (firstUnplayedEpisode.length > 0) {
-                    resolve(firstUnplayedEpisode[0]) // Resolve the first unplayed episode
-                  } else {
-                    reject(__('talkback.no_latest_episode_found'))
-                  }
+              // Create the fuzzy search object
+              var fuse = new Fuse(result.tvshows, options)
+              var searchResult = fuse.search(seriesName.trim())
+
+              // If there's a result
+              if (searchResult.length > 0) {
+                // e.g. { label: 'Narcos', tvshowid: 43 }
+                var seriesResult = searchResult[0] // Always use searchResult[0], this is the result with the highest probability (setting shouldSort = true)
+
+                // Build filter to search unwatched episodes
+                var param = {
+                  tvshowid: seriesResult.tvshowid,
+                  properties: ['playcount', 'showtitle', 'season', 'episode']
                 }
-              )
+                xbmc.method('VideoLibrary.GetEpisodes', param,
+                  function (error, result) {
+                    if (error) {
+                      reject(error)
+                    }
+
+                    // Check whether we have seen this episode already
+                    var firstUnplayedEpisode = result.episodes.filter(function (item) {
+                      return item.playcount === 0
+                    })
+                    if (firstUnplayedEpisode.length > 0) {
+                      resolve(firstUnplayedEpisode[0]) // Resolve the first unplayed episode
+                    } else {
+                      reject(__('talkback.no_latest_episode_found'))
+                    }
+                  }
+                )
+              } else {
+                reject(__('talkback.series_not_found'))
+              }
             } else {
-              reject(__('talkback.series_not_found'))
+              // No TV Shows in the library
+              reject(__('talkback.no_tvshows_in_library'))
             }
           }
         )
