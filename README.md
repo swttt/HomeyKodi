@@ -25,11 +25,13 @@ Note: Only adding 1 device is currently supported
 *Triggers*
 * On movie start
 * On episode start
-* On pause  (only triggered when pausing through Homey)
-* On resume (only triggered when resuming through Homey)
-* On stop (only triggered when stopping through Homey)
+* On pause  
+* On resume 
+* On stop 
 
 *Actions*
 * Start a movie
 * Play / Pause
 * Stop
+
+Flows are now triggered whenever something happens on Kodi, whether this has been trigger by Homey or any other remote control.

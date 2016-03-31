@@ -8,6 +8,16 @@ function init () {
   Homey.manager('flow').on('action.play_movie_kodi', onFlowActionPlayMovieKodi)
   Homey.manager('flow').on('action.pause_resume_kodi', onFlowActionPauseResumeKodi)
   Homey.manager('flow').on('action.stop_kodi', onFlowActionStopKodi)
+  // Homey.manager('flow').on('trigger.kodi_stop', function (callback, args) {
+  //   console.log('in trigger.kodi_stop')
+  //   console.log(args)
+  //   callback(null, true)
+  // })
+  // Homey.manager('flow').on('trigger.kodi_movie_start', function (callback, args) {
+  //   console.log('in trigger.kodi_movie_start')
+  //   console.log(args)
+  //   callback(null, true)
+  // })
 }
 module.exports.init = init
 
@@ -43,8 +53,8 @@ function parseSpeach (speech, callback) {
       case 'kodi_play_music' :
         var musicTranscriptWithoutTrigger = speech.transcript.replace(trigger.text, '')
         // Check how to search for music
-        if (musicTranscriptWithoutTrigger.indexOf(__('by')) > -1 || musicTranscriptWithoutTrigger.indexOf(__('artist')) > -1) {
-          var artistSearchQuery = musicTranscriptWithoutTrigger.replace(__('by'), '').replace(__('artist'), '')
+        if (musicTranscriptWithoutTrigger.indexOf(__('speech.by')) > -1 || musicTranscriptWithoutTrigger.indexOf(__('speech.artist')) > -1) {
+          var artistSearchQuery = musicTranscriptWithoutTrigger.replace(__('speech.by'), '').replace(__('speech.artist'), '')
           // NOTE:	no multiple device support yet, pass null as device so 1st registered device gets picked
           searchAndPlayMusic(null, 'ARTIST', artistSearchQuery)
             .catch(
@@ -61,15 +71,6 @@ function parseSpeach (speech, callback) {
 
       case 'kodi_play_pause' :
         Homey.manager('drivers').getDriver('kodi').playPause(null)
-          .then(function (newState) {
-            if (newState === 'paused') {
-              Homey.log('Triggering flow kodi_pause')
-              Homey.manager('flow').trigger('kodi_pause')
-            } else {
-              Homey.log('Triggering flow kodi_resume')
-              Homey.manager('flow').trigger('kodi_resume')
-            }
-          })
           .catch(
             function (err) {
               // Driver should throw user friendly errors
@@ -80,10 +81,6 @@ function parseSpeach (speech, callback) {
 
       case 'kodi_stop' :
         Homey.manager('drivers').getDriver('kodi').stop(null)
-        .then(function () {
-          Homey.log('Triggering flow kodi_stop')
-          Homey.manager('flow').trigger('kodi_stop')
-        })
         .catch(
           function (err) {
             // Driver should throw user friendly errors
@@ -94,7 +91,7 @@ function parseSpeach (speech, callback) {
 
       case 'kodi_next' :
         Homey.manager('drivers').getDriver('kodi').nextOrPreviousTrack(null, 'next')
-        .then(function (episodeToPlay) {
+        .then(function () {
           // TODO FLOW TRIGGER
         })
         .catch(
@@ -136,27 +133,27 @@ function parseSpeach (speech, callback) {
 }
 
 /* ******************
-	FLOW ACTIONS
+	FLOW ACTIONS / TRIGGER FUNCTIONS
 ********************/
 function onFlowActionPlayMovieKodi (callback, args) {
   Homey.log('onFlowActionPlayMovieKodi', args)
   searchAndPlayMovie(args.id, args.movie_title)
-    .then(callback)
-    .catch(console.error)
+    .then(function () { callback(null, true) })
+    .catch(function (error) { callback(error) })
 }
 
 function onFlowActionPauseResumeKodi (callback, args) {
   Homey.log('onFlowActionPauseResumeKodi()', args)
   Homey.manager('drivers').getDriver('kodi').playPause(args.id)
-    .then(callback)
-    .catch(console.error)
+    .then(function () { callback(null, true) })
+    .catch(function (error) { callback(error) })
 }
 
 function onFlowActionStopKodi (callback, args) {
   Homey.log('onFlowActionStopKodi()', args)
   Homey.manager('drivers').getDriver('kodi').stop(args.id)
-    .then(callback)
-    .catch(console.error)
+    .then(function () { callback(null, true) })
+    .catch(function (error) { callback(error) })
 }
 
 /* ******************
@@ -174,16 +171,9 @@ function searchAndPlayMovie (device, movieTitle) {
         // Play movie and trigger flows
         function (movie) {
           KodiDriver.playMovie(device, movie.movieid)
-            .then(resolve)
-            .catch(reject)
-          Homey.log('Triggering flow kodi_movie_start, movie_title: ', movie.label)
-          // Trigger flows and pass variables
-          Homey.manager('flow').trigger('kodi_movie_start', {
-            movie_title: movie.label
-          })
         }
     )
-      .catch(reject)
+    .catch(reject)
   })
 }
 
@@ -197,7 +187,6 @@ function searchAndPlayMusic (device, queryProperty, searchQuery) {
       .then(
         function (songsToPlay) {
           KodiDriver.playMusic(device, songsToPlay, true)
-          .catch(reject)
         }
       )
       .catch(reject)
@@ -213,19 +202,6 @@ function playLatestEpisode (device, seriesName) {
       .then(
         function (episodeToPlay) {
           KodiDriver.playEpisode(device, episodeToPlay)
-          .then(
-            function () {
-              // Trigger action kodi_episode_start
-              Homey.log('Triggering flow kodi_episode_start, tvshow_title: ', episodeToPlay.showtitle, 'episode_title: ', episodeToPlay.label, 'season: ', episodeToPlay.season, 'episode: ', episodeToPlay.episode)
-              Homey.manager('flow').trigger('kodi_episode_start', {
-                tvshow_title: episodeToPlay.showtitle,
-                episode_title: episodeToPlay.label,
-                season: episodeToPlay.season,
-                episode: episodeToPlay.episode
-              })
-            }
-          )
-          .catch(reject)
         }
       )
       .catch(reject)

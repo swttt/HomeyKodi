@@ -1,0 +1,42 @@
+{
+	"talkback":{
+		"movie_not_found":"Ik kon de film niet vinden",
+		"device_not_found":"Ik kon het apparaat niet vinden",
+    "artist_not_found":"Ik kon de artiest niet vinden",
+    "album_not_found":"Ik kon het album niet vinden",
+		"not_implemented":"Ik weet nog niet hoe ik dit moet doen",
+    "series_not_found":"Ik kon de serie die je zocht niet vinden",
+    "no_latest_episode_found":"Je hebt elke aflevering van deze serie al bekeken!",
+    "no_movies_in_library": "Er zijn geen films in je bibliotheek, voeg ze eerst toe.",
+    "no_tvshows_in_library": "Er zijn geen series in je bibliotheek, voeg ze eerst toe",
+    "no_music_in_library": "Er is geen muziek in je bibliotheek, voeg het eerst toe",
+    "something_went_wrong": "Oeps! Er ging iets fout"
+	}
+	,
+	"speech": {
+		"play": "speel",
+		"movie":"film",
+		"tv_show":"serie",
+		"on kodi":"op kodi",
+    "artist": "artiest",
+    "by": "van",
+    "on":"op"
+	}
+	,
+	"pair": {
+		"authorization": {
+			"configure": "Configureer Kodi",
+			"start_configuration":"Opslaan!",
+			"configuration_explanation": "Voer je Kodi connectie details in! <br />Deze kun je vinden onder System > Systeeminformatie. <br />Zorg er ook voor dat de optie 'Sta externe programmas toe om Kodi te besturen' aan staat onder System/Settings/Network/Services"
+		},
+    "configuration": {
+       "name": "Naam",
+       "ip_address": "IP Adres",
+       "tcpPort": "TCP Poort (standaard 9090)"       
+    },
+		"feedback":{
+			"could_not_connect": "Kon geen verbinding maken met Kodi. Check je connectie gegevens.",
+			"succesfully_connected": "Connectie succesvol!"
+		}
+	 }
+}

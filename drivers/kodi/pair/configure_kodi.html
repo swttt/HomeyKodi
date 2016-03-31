@@ -4,29 +4,30 @@
   }
 </style>
 <script type="text/javascript">       
-    // Set window options
-    var width	= 400;
-    var height	= 400;
-    var left	= (screen.width/2)-(width/2);
-    var top		= (screen.height/2)-(height/2);
-    var url;   
+  // Set window options
+  var width	= 400;
+  var height	= 400;
+  var left	= (screen.width/2)-(width/2);
+  var top		= (screen.height/2)-(height/2);
+  var url;
+  
+  // Set translated items   
+  $("label[for='name']").text(__('pair.configuration.name') + ':')
+  $("label[for='ip_address']").text(__('pair.configuration.ip_address') + ':')  
+  $("label[for='tcpPort']").text(__('pair.configuration.tcpPort') + ':')
 	
 	function configure()
 	{		
     $('.kodi-err-msg').text('')
     
 		var name = $("#name").val();
-		var ipAddress = $("#ip_address").val();
-		var port = $("#port").val();
-		var username = $("#username").val();
-		var password = $("#password").val();
+		var ipAddress = $("#ip_address").val();		
+		var tcpPort = $("#tcpPort").val();
 	
 		var params = {
 			name: name,
 			host: ipAddress,
-			httpPort: port,
-			username: username,
-			password: password
+			tcpPort: tcpPort
 		}	
 		
 		Homey.emit( 'configure_kodi', params, function ( err, result ) {
@@ -41,10 +42,8 @@
 					},
 					name: name, // the name for this device (optional),
 					settings: { 
-						host: ipAddress,
-						http_port: port,
-						username: username,
-						password: password
+						host: ipAddress,		
+            tcpport: tcpPort
 					} // initial settings (optional)
 				}, function( err, result ){
 					if( err ) return console.error(err);
@@ -60,20 +59,14 @@
 <p id="authentication_text" data-i18n="pair.authorization.configuration_explanation"></p>
 <p class="form-group">
   <span class="input-wrap">    
-    <label for="name">Name:</label>      
+    <label for="name"></label>      
     <input type="text" id="name"></input>
     
-    <label for="ip_address">IP Address:</label>    
+    <label for="ip_address"></label>    
     <input type="text" id="ip_address"></input>
-    
-    <label for="port">Port:</label>          
-    <input type="text" id="port"></input>
-    
-    <label for="username">Username:</label>          
-    <input type="text" id="username"></input>
-    
-    <label for="password">Password:</label>          
-    <input type="text" id="password"></input>
+        
+    <label for="tcpPort"></label>          
+    <input type="text" id="tcpPort"></input>
   </span>    
 </p>
 <button class="button" id="authentication_button" onclick="configure();" data-i18n="pair.authorization.start_configuration" />

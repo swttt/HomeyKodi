@@ -27,8 +27,13 @@
 		"authorization": {
 			"configure": "Configure Kodi",
 			"start_configuration":"Configure!",
-			"configuration_explanation": "Add your Kodi connection details to connect! <br />These can be found under System > Settings > System > Services > Web server on your Kodi device."
+			"configuration_explanation": "Add your Kodi connection details to connect! <br /> These can be found under System > System info. <br />In System/Settings/Network/Services activate 'Allow programs on other systems to control Kodi'"
 		},
+    "configuration": {
+       "name": "Name",
+       "ip_address": "IP Address",       
+       "tcpPort": "TCP Port (Default 9090)"       
+    },
 		"feedback":{
 			"could_not_connect": "Could not connect to your Kodi! Please verify your details.",
 			"succesfully_connected": "Connection succesful!"
