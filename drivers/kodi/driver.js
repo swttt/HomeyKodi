@@ -18,9 +18,10 @@ module.exports.init = function (devices, callback) {
       if (err) {
         callback(err, null)
       }
-
       // Try to connect and register device using websockets
       KodiWs(settings.host, settings.tcpport).then(function (connection) {
+        // Keep track of the device id
+        connection.id = settings.host
         // Register the device
         registeredDevices.push(connection)
         // Start listening for Kodi events
@@ -42,6 +43,8 @@ module.exports.pair = function (socket) {
     .then(function (connection) {
       // Register the device
       registeredDevices.push(connection)
+      // Start listening for Kodi events
+      startListeningForEvents(connection)
       callback(null, __('pair.feedback.succesfully_connected'))
     })
     .catch(function (err) {
@@ -413,11 +416,16 @@ module.exports.getLatestEpisode = function (deviceSearchParameters, seriesName) 
                 // Build filter to search unwatched episodes
                 var param = {
                   tvshowid: seriesResult.tvshowid,
-                  properties: ['playcount', 'showtitle', 'season', 'episode']
+                  properties: ['playcount', 'showtitle', 'season', 'episode'],
+                  // Sort the result so we can grab the first unwatched episode
+                  sort: {
+                    order: 'ascending',
+                    method: 'episode',
+                    ignorearticle: true
+                  }
                 }
                 kodi.run('VideoLibrary.GetEpisodes', param)
                   .then(function (result) {
-                    console.log('3')
                     // Check if there are episodes for this TV show
                     if (result.episodes) {
                       // Check whether we have seen this episode already
@@ -493,6 +501,7 @@ function getKodiInstance (searchParameters) {
     - All functions related to event handling
 ************************************/
 function startListeningForEvents (device) {
+  console.log('startListeningForEvents()')
   // Map supported Kodi events to indidual functions and pass the device connection to trigger the appropriate flows
   device.notification('Player.OnPause', function (result) { onKodiPause(result, device) })
   device.notification('Player.OnPlay', function (result) { onKodiPlay(result, device) })
@@ -503,14 +512,14 @@ function onKodiPause (result, device) {
   console.log('onKodiPause()')
   // Trigger the flow
   console.log('Triggering flow kodi_pause')
-  Homey.manager('flow').trigger('kodi_pause')
+  Homey.manager('flow').triggerDevice('kodi_pause', null, null, device.id)
 }
 
 function onKodiStop (result, device) {
   console.log('onKodiStop()')
   // Trigger the flow
   console.log('Triggering flow kodi_stop')
-  Homey.manager('flow').trigger('kodi_stop')
+  Homey.manager('flow').triggerDevice('kodi_stop', null, null, device.id)
 }
 
 function onKodiPlay (result, device) {
@@ -523,11 +532,11 @@ function onKodiPlay (result, device) {
   }
   device.run('Player.GetProperties', params)
     .then(function (playerResult) {
-      // If the percentage is above 0.05, we have a resume-action
+      // If the percentage is above 0.1, we have a resume-action
       if (playerResult) {
-        if (playerResult.percentage >= 0.05) {
+        if (playerResult.percentage >= 0.1) {
           console.log('Triggering flow kodi_resume')
-          Homey.manager('flow').trigger('kodi_resume')
+          Homey.manager('flow').triggerDevice('kodi_resume', null, null, device.id)
           // Check the playback type (movie or episode)
         } else if (result.data.item.type === 'movie' || result.data.item.type === 'movies') {
           // Get movie title
@@ -535,16 +544,15 @@ function onKodiPlay (result, device) {
             movieid: result.data.item.id,
             properties: ['title']
           }
-          console.log(movieParams)
           device.run('VideoLibrary.GetMovieDetails', movieParams)
             .then(function (movieResult) {
               // Trigger appropriate flows
               Homey.log('Triggering flow kodi_movie_start, movie_title: ', movieResult.moviedetails.label)
               // Trigger flows and pass variables
-              Homey.manager('flow').trigger('kodi_movie_start', {
+              Homey.manager('flow').triggerDevice('kodi_movie_start', {
                 // Pass movie title as flow token
                 movie_title: movieResult.moviedetails.label
-              })
+              }, null, device.id)
             })
         } else if (result.data.item.type === 'episode' || result.data.item.type === 'episodes') {
           // Get Episode details
@@ -556,18 +564,14 @@ function onKodiPlay (result, device) {
             .then(function (episodeResult) {
               // Trigger action kodi_episode_start
               Homey.log('Triggering flow kodi_episode_start, tvshow_title: ', episodeResult.episodedetails.showtitle, 'episode_title: ', episodeResult.episodedetails.label, 'season: ', episodeResult.episodedetails.season, 'episode: ', episodeResult.episodedetails.episode)
-              Homey.manager('flow').trigger('kodi_episode_start', {
+              Homey.manager('flow').triggerDevice('kodi_episode_start', {
                 tvshow_title: episodeResult.episodedetails.showtitle,
                 episode_title: episodeResult.episodedetails.label,
                 season: episodeResult.episodedetails.season,
                 episode: episodeResult.episodedetails.episode
-              })
+              }, null, device.id)
             })
-        } else {
-          console.log('else')
         }
-      } else {
-        console.log('geen result')
       }
     })
 }
