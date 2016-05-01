@@ -20,12 +20,16 @@ module.exports.init = function (devices, callback) {
       }
       // Try to connect and register device using websockets
       KodiWs(settings.host, settings.tcpport).then(function (connection) {
-        // Keep track of the device id
+        // Keep track of the device id and name
         connection.id = settings.host
+        connection.tcpport = settings.tcpport
         // Register the device
         registeredDevices.push(connection)
         // Start listening for Kodi events
         startListeningForEvents(connection)
+      })
+      .catch(function (err) {
+        console.error(err)
       })
     })
   })
@@ -41,6 +45,9 @@ module.exports.pair = function (socket) {
     // Try to connect and register device
     KodiWs(data.host, data.tcpPort)
     .then(function (connection) {
+      // Keep track of device id
+      connection.id = data.host
+      connection.tcpport = data.tcpPort
       // Register the device
       registeredDevices.push(connection)
       // Start listening for Kodi events
@@ -59,16 +66,33 @@ module.exports.pair = function (socket) {
 
 // Device gets deleted
 module.exports.deleted = function (device_data) {
+  console.log('Deleting device', device_data.id)
   // Create a new array without the deleted device
-  registeredDevices = registeredDevices.filter(function (item) {
-    return item.host !== device_data.id
-  })
+  deleteDevice(device_data.id)
 }
 
 // A user has updated settings, update the device object
 module.exports.settings = function (device_data, newSettingsObj, oldSettingsObj, changedKeysArr, callback) {
-  // TO IMPLEMENT
-  callback(null, true)
+  console.log('Updating device', device_data.id, 'to', newSettingsObj.host, newSettingsObj.tcpport)
+  // If we can connect using the new settings
+  KodiWs(newSettingsObj.host, newSettingsObj.tcpport)
+    .then(function (connection) {
+      // Create a new array without the updated device
+      deleteDevice(device_data.id)
+      // Keep track of the device id and port
+      connection.id = newSettingsObj.host
+      connection.tcpport = newSettingsObj.tcpport
+      // Register the new settings of device
+      registeredDevices.push(connection)
+      // Start listening for Kodi events
+      startListeningForEvents(connection)
+    })
+    .then(function () {
+      callback(null, __('pair.feedback.succesfully_connected'))
+    })
+    .catch(function (err) {
+      callback(__('pair.feedback.could_not_connect') + ' ' + err)
+    })
 }
 
 // START EXPORTING DRIVER SPECIFIC FUNCTIONS
@@ -485,14 +509,29 @@ function getKodiInstance (searchParameters) {
   return new Promise(function (resolve, reject) {
     console.log('getKodiInstance', searchParameters)
     // If only 1 registered device, just return it
-    // @TODO fix multiple devices support
-    var device = registeredDevices.length === 1 || searchParameters === null ? registeredDevices[0] : registeredDevices[searchParameters]
+    var device = null
+    if (registeredDevices.length === 1 || searchParameters === null) {
+      device = registeredDevices[0]
+    } else {
+      // Search parameters have been provided, look for a device with the supplied ID
+      registeredDevices.filter(function (item) {
+        return item.id === searchParameters
+      })
+    }
 
     if (device) {
       resolve(device)
     } else {
       reject(__('talkback.device_not_found'))
     }
+  })
+}
+/* **********************************
+  GENERIC FUNCTIONS
+************************************/
+function deleteDevice (deviceId) {
+  registeredDevices = registeredDevices.filter(function (item) {
+    return item.id !== deviceId
   })
 }
 
@@ -506,6 +545,42 @@ function startListeningForEvents (device) {
   device.notification('Player.OnPause', function (result) { onKodiPause(result, device) })
   device.notification('Player.OnPlay', function (result) { onKodiPlay(result, device) })
   device.notification('Player.OnStop', function (result) { onKodiStop(result, device) })
+
+  // Catch error when Kodi power is shutdown
+  device.on('error', function (error) {
+    console.log('Kodi connection error: ', error)
+  })
+
+  // Keep track of connection loss
+  device.on('close', function () {
+    console.log('Connection closed')
+    // Save connection details to reconnect
+    let host = device.id
+    let tcpport = device.tcpport
+    // Delete the device details from Homey
+    deleteDevice(device.id)
+
+    // Try to reconnect every 10sec
+    function reconnect () {
+      console.log('Trying to reconnect')
+      KodiWs(host, tcpport)
+      .then(function (connection) {
+        // Keep track of device id
+        connection.id = host
+        connection.tcpport = tcpport
+        // Register the device
+        registeredDevices.push(connection)
+        // Start listening for Kodi events
+        startListeningForEvents(connection)
+      })
+      .catch(function (err) {
+        console.log('Stil cannot reconnect: ', err)
+        setTimeout(reconnect, 10000)
+      })
+    }
+
+    reconnect()
+  })
 }
 
 function onKodiPause (result, device) {

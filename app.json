@@ -8,7 +8,7 @@
     "en": "Control your Kodi device with Homey!",    
     "nl": "Bestuur je Kodi apparaat met Homey!"
   },
-  "version": "1.1.0",
+  "version": "1.1.2",
   "compatibility": ">=0.8.24 || 1.x",
   "category": [
     "music",
@@ -25,7 +25,7 @@
       "importance": 1,
       "triggers" : {
         "en" : ["play movie"],
-        "nl" : ["speel film", "speel de film"]
+        "nl" : ["speel film", "speel de film", "start film", "start de film"]
       }
     },
     {
@@ -33,7 +33,7 @@
       "importance": 1,
       "triggers" : {
         "en" : ["play tv show"],
-        "nl" : ["speel serie", "speel de serie"]
+        "nl" : ["speel serie", "speel de serie", "start serie", "start de serie"]
       }
     },
     {
@@ -80,8 +80,8 @@
        "id": "kodi_play_latest_episode",
        "importance": 1,
        "triggers": {
-         "en": ["play latest episode of", "play the latest episode of", "play latest episode", "play latest episode of"],
-         "nl": ["speel de laatste aflevering", "speel de laatste aflevering van", "speel laatste aflevering"]
+         "en": ["play latest episode of", "play the latest episode of", "play latest episode", "play the latest episode"],
+         "nl": ["speel de laatste aflevering", "speel de laatste aflevering van", "speel laatste aflevering", "start de laatste aflevering", "start de laatste aflevering van", "start laatste aflevering"]
        }
     }
   ],

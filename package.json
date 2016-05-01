@@ -1,6 +1,6 @@
 {
   "name": "homeykodi",
-  "version": "1.1.0",
+  "version": "1.1.2",
   "description": "Adds Kodi support to your Homey!",
   "main": "app.js",
   "dependencies": {

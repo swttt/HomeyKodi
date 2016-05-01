@@ -26,7 +26,7 @@ module.exports.init = init
 ******************* */
 function parseSpeach (speech, callback) {
   Homey.log('parseSpeach()', speech)
-
+  console.log(speech)
   speech.triggers.some(function (trigger) {
     switch (trigger.id) {
       case 'kodi_play_movie' :

@@ -10,6 +10,7 @@ Currently working:
   - Latest unwatched episode of a tv show
 - Play / pause / stop through speech
 - Various flow triggers / actions
+- Auto reconnection when Kodi has shutdown
 
 Note: Only adding 1 device is currently supported
 
@@ -34,4 +35,4 @@ Note: Only adding 1 device is currently supported
 * Play / Pause
 * Stop
 
-Flows are now triggered whenever something happens on Kodi, whether this has been trigger by Homey or any other remote control.
+Flows are now triggered whenever something happens on Kodi, whether this has been triggered by Homey or any other remote control.
