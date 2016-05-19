@@ -13,6 +13,18 @@
     "something_went_wrong": "Oeps! Er ging iets fout"
 	}
 	,
+	"question":{
+		"what_movie":"Welke film wil je kijken?",
+		"what_serie":"Welke serie wil je kijken?",
+		"which_season":"Van welk seizoen wil je een aflevering zien?",
+		"which_episode":"Welke aflevering wil je zien?",
+		"what_media":"Wat wil je kijken? Een film of serie?",
+		"latest_episode_retry": "Laten we het nog een keer proberen. Van welke serie wilde je de laatste aflevering zien?",
+		"confirm_hibernate": "Weet je zeker dat je Kodi in slaapstand wilt zetten?",
+		"confirm_reboot": "Weet je zeker dat je Kodi opnieuw op wilt starten?",
+		"confirm_shutdown": "Weet je zeker dat je Kodi af wilt sluiten?"
+	}
+	,
 	"speech": {
 		"play": "speel",
 		"movie":"film",
@@ -27,7 +39,7 @@
 		"authorization": {
 			"configure": "Configureer Kodi",
 			"start_configuration":"Opslaan!",
-			"configuration_explanation": "Voer je Kodi connectie details in! <br />Deze kun je vinden onder System > Systeeminformatie. <br />Zorg er ook voor dat de optie 'Sta externe programmas toe om Kodi te besturen' aan staat onder System/Settings/Network/Services"
+			"configuration_explanation": "Voer je Kodi connectie details in! <br />Deze kun je vinden onder System > Systeeminformatie. <br />Zorg er ook voor dat de optie 'Sta externe programmas toe om Kodi te besturen' aan staat onder System/Settings/Network/Services. Herstart Kodi na het aanzetten van deze optie."
 		},
     "configuration": {
        "name": "Naam",

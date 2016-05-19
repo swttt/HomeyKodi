@@ -8,8 +8,8 @@
     "en": "Control your Kodi device with Homey!",    
     "nl": "Bestuur je Kodi apparaat met Homey!"
   },
-  "version": "1.1.2",
-  "compatibility": ">=0.8.24 || 1.x",
+  "version": "1.2.0",
+  "compatibility": ">=0.8.32 || 1.x",
   "category": [
     "music",
     "video"
@@ -22,7 +22,7 @@
   "speech":[
     {
       "id": "kodi_play_movie",
-      "importance": 1,
+      "importance": 0.7,
       "triggers" : {
         "en" : ["play movie"],
         "nl" : ["speel film", "speel de film", "start film", "start de film"]
@@ -38,7 +38,7 @@
     },
     {
       "id": "kodi_play_music",
-      "importance": 1,
+      "importance": 0.7,
       "triggers" : {
         "en" : ["play music"],
         "nl": ["speel muziek"]
@@ -46,10 +46,10 @@
     },
     {
       "id": "kodi_play_pause",
-      "importance": 1,
+      "importance": 0.7,
       "triggers" : {
         "en" : ["pause", "resume"],
-        "nl" : ["pauze", "speel", "hervat"]
+        "nl" : ["pauze", "hervat"]
       }
     },
     {
@@ -83,7 +83,48 @@
          "en": ["play latest episode of", "play the latest episode of", "play latest episode", "play the latest episode"],
          "nl": ["speel de laatste aflevering", "speel de laatste aflevering van", "speel laatste aflevering", "start de laatste aflevering", "start de laatste aflevering van", "start laatste aflevering"]
        }
+    },
+    {
+      "id": "kodi_watch_something",
+      "importance": 1,
+      "triggers" : {
+        "en" : ["watch something"],
+        "nl": ["iets kijken"]
+      }
+    },
+    {
+      "id": "kodi_watch_movie",
+      "importance": 1,
+      "triggers" : {
+        "en" : ["watch a movie", "watch movie"],
+        "nl": ["film kijken"]
+      }
+    },
+    {
+      "id": "kodi_hibernate",
+      "importance": 0.5,
+      "triggers" : {
+        "en" : ["hibernate kodi"],
+        "nl": ["slaap kodi"]
+      }
+    },
+    {
+      "id": "kodi_shutdown",
+      "importance": 0.5,
+      "triggers" : {
+        "en" : ["shutdown kodi"],
+        "nl": ["kodi afsluiten"]
+      }
+    },
+    {
+      "id": "kodi_reboot",
+      "importance": 0.5,
+      "triggers" : {
+        "en" : ["reboot kodi"],
+        "nl": ["kodi herstarten"]
+      }
     }
+    
   ],
   "drivers": [
     {
@@ -274,6 +315,62 @@
             "filter": "driver_uri=homey:app:nl.marvinschenkel.kodi&driver_id=kodi"
           }
         ]
+      },
+      {
+        "id":"kodi_hibernate",
+        "title": {
+          "en":"Kodi is going to hibernate",
+          "nl": "Kodi gaat in slaapstand"
+        },
+        "args": [
+          {
+            "name": "kodi",
+            "type": "device",
+            "filter": "driver_uri=homey:app:nl.marvinschenkel.kodi&driver_id=kodi"
+          }
+        ]
+      },
+      {
+        "id":"kodi_reboot",
+        "title": {
+          "en":"Kodi is going to reboot",
+          "nl": "Kodi wordt herstart"
+        },
+        "args": [
+          {
+            "name": "kodi",
+            "type": "device",
+            "filter": "driver_uri=homey:app:nl.marvinschenkel.kodi&driver_id=kodi"
+          }
+        ]
+      },
+      {
+        "id":"kodi_shutdown",
+        "title": {
+          "en":"Kodi is going to shutdown",
+          "nl": "Kodi wordt afgesloten"
+        },
+        "args": [
+          {
+            "name": "kodi",
+            "type": "device",
+            "filter": "driver_uri=homey:app:nl.marvinschenkel.kodi&driver_id=kodi"
+          }
+        ]
+      },
+      {
+        "id":"kodi_wake",
+        "title": {
+          "en":"Kodi woke up from hibernate",
+          "nl": "Kodi is actief na slaapstand"
+        },
+        "args": [
+          {
+            "name": "kodi",
+            "type": "device",
+            "filter": "driver_uri=homey:app:nl.marvinschenkel.kodi&driver_id=kodi"
+          }
+        ]
       }
     ],
     "actions":[
@@ -301,6 +398,29 @@
         ]
       },
       {
+        "id": "play_latest_episode_kodi",
+        "title": {
+          "en" : "Play the latest episode of a series on Kodi",
+          "nl":"Speel de laatste aflevering van een serie af op Kodi"
+        },
+        "fluidArgs": true,
+        "args":[
+          {
+            "name": "kodi",
+            "type": "device",
+            "filter": "driver_uri=homey:app:nl.marvinschenkel.kodi&driver_id=kodi"
+          },
+          {
+            "name": "series_title",
+            "type": "text",
+            "placeholder" : {
+              "en" : "Type a series title that's in your library",
+              "nl": "Voer een serie uit je bibliotheek in"
+            }
+          }
+        ]
+      },
+      {
         "id": "pause_resume_kodi",
         "title": {
           "en" : "Pause / resume playback on Kodi",
@@ -320,6 +440,51 @@
         "title": {
           "en" : "Stop playback on Kodi",
           "nl" : "Stop afspelen op Kodi"
+        },
+        "fluidArgs": true,
+        "args":[
+          {
+            "name": "kodi",
+            "type": "device",
+            "filter": "driver_uri=homey:app:nl.marvinschenkel.kodi&driver_id=kodi"
+          }
+        ]
+      },
+      {
+        "id": "hibernate_kodi",
+        "title": {
+          "en" : "Hibernate Kodi",
+          "nl" : "Zet Kodi in slaapstand"
+        },
+        "fluidArgs": true,
+        "args":[
+          {
+            "name": "kodi",
+            "type": "device",
+            "filter": "driver_uri=homey:app:nl.marvinschenkel.kodi&driver_id=kodi"
+          }
+        ]
+      },
+      {
+        "id": "reboot_kodi",
+        "title": {
+          "en" : "Reboot Kodi",
+          "nl" : "Herstart Kodi"
+        },
+        "fluidArgs": true,
+        "args":[
+          {
+            "name": "kodi",
+            "type": "device",
+            "filter": "driver_uri=homey:app:nl.marvinschenkel.kodi&driver_id=kodi"
+          }
+        ]
+      },
+      {
+        "id": "shutdown_kodi",
+        "title": {
+          "en" : "Shutdown Kodi",
+          "nl" : "Sluit Kodi af"
         },
         "fluidArgs": true,
         "args":[

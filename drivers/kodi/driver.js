@@ -527,6 +527,59 @@ function getKodiInstance (searchParameters) {
   })
 }
 /* **********************************
+  SYSTEM FUNCTIONS
+************************************/
+module.exports.shutdownKodi = function (deviceSearchParameters) {
+  // Kodi API: System.Shutdown
+  return new Promise(function (resolve, reject) {
+    console.log('shutdownKodi()', deviceSearchParameters)
+    // search Kodi instance by searchParameters
+    getKodiInstance(deviceSearchParameters)
+      .then(function (kodi) {
+        kodi.run('System.Shutdown')
+          .then(function (result) {
+            // Episode started playing succesfully, return device for flow handling
+            resolve(kodi)
+          })
+      })
+      .catch(reject)
+  })
+}
+
+module.exports.rebootKodi = function (deviceSearchParameters) {
+  // Kodi API: System.Reboot
+  return new Promise(function (resolve, reject) {
+    console.log('rebootKodi()', deviceSearchParameters)
+    // search Kodi instance by searchParameters
+    getKodiInstance(deviceSearchParameters)
+      .then(function (kodi) {
+        kodi.run('System.Reboot')
+          .then(function (result) {
+            // Episode started playing succesfully, return device for flow handling
+            resolve(kodi)
+          })
+      })
+      .catch(reject)
+  })
+}
+
+module.exports.hibernateKodi = function (deviceSearchParameters) {
+  // Kodi API: System.Hibernate
+  return new Promise(function (resolve, reject) {
+    console.log('hibernateKodi()', deviceSearchParameters)
+    // search Kodi instance by searchParameters
+    getKodiInstance(deviceSearchParameters)
+      .then(function (kodi) {
+        kodi.run('System.Hibernate')
+          .then(function (result) {
+            // Episode started playing succesfully, return device for flow handling
+            resolve(kodi)
+          })
+      })
+      .catch(reject)
+  })
+}
+/* **********************************
   GENERIC FUNCTIONS
 ************************************/
 function deleteDevice (deviceId) {
@@ -542,9 +595,13 @@ function deleteDevice (deviceId) {
 function startListeningForEvents (device) {
   console.log('startListeningForEvents()')
   // Map supported Kodi events to indidual functions and pass the device connection to trigger the appropriate flows
-  device.notification('Player.OnPause', function (result) { onKodiPause(result, device) })
+  device.notification('Player.OnPause', function (result) { onKodiGenericEvent(result, device, 'kodi_pause') })
   device.notification('Player.OnPlay', function (result) { onKodiPlay(result, device) })
-  device.notification('Player.OnStop', function (result) { onKodiStop(result, device) })
+  device.notification('Player.OnStop', function (result) { onKodiGenericEvent(result, device, 'kodi_stop') })
+  device.notification('System.OnQuit', function (result) { onKodiGenericEvent(result, device, 'kodi_shutdown') })
+  device.notification('System.OnSleep', function (result) { onKodiGenericEvent(result, device, 'kodi_hibernate') })
+  device.notification('System.OnRestart', function (result) { onKodiGenericEvent(result, device, 'kodi_reboot') })
+  device.notification('System.OnWake', function (result) { onKodiGenericEvent(result, device, 'kodi_wake') })
 
   // Catch error when Kodi power is shutdown
   device.on('error', function (error) {
@@ -583,18 +640,11 @@ function startListeningForEvents (device) {
   })
 }
 
-function onKodiPause (result, device) {
+function onKodiGenericEvent (result, device, triggerName) {
   console.log('onKodiPause()')
   // Trigger the flow
-  console.log('Triggering flow kodi_pause')
-  Homey.manager('flow').triggerDevice('kodi_pause', null, null, device.id)
-}
-
-function onKodiStop (result, device) {
-  console.log('onKodiStop()')
-  // Trigger the flow
-  console.log('Triggering flow kodi_stop')
-  Homey.manager('flow').triggerDevice('kodi_stop', null, null, device.id)
+  console.log('Triggering flow ', triggerName)
+  Homey.manager('flow').triggerDevice(triggerName, null, null, device.id)
 }
 
 function onKodiPlay (result, device) {

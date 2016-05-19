@@ -8,16 +8,10 @@ function init () {
   Homey.manager('flow').on('action.play_movie_kodi', onFlowActionPlayMovieKodi)
   Homey.manager('flow').on('action.pause_resume_kodi', onFlowActionPauseResumeKodi)
   Homey.manager('flow').on('action.stop_kodi', onFlowActionStopKodi)
-  // Homey.manager('flow').on('trigger.kodi_stop', function (callback, args) {
-  //   console.log('in trigger.kodi_stop')
-  //   console.log(args)
-  //   callback(null, true)
-  // })
-  // Homey.manager('flow').on('trigger.kodi_movie_start', function (callback, args) {
-  //   console.log('in trigger.kodi_movie_start')
-  //   console.log(args)
-  //   callback(null, true)
-  // })
+  Homey.manager('flow').on('action.play_latest_episode_kodi', onFlowActionPlayLatestEpisode)
+  Homey.manager('flow').on('action.hibernate_kodi', onFlowActionHibernate)
+  Homey.manager('flow').on('action.reboot_kodi', onFlowActionReboot)
+  Homey.manager('flow').on('action.shutdown_kodi', onFlowActionShutdown)
 }
 module.exports.init = init
 
@@ -91,9 +85,6 @@ function parseSpeach (speech, callback) {
 
       case 'kodi_next' :
         Homey.manager('drivers').getDriver('kodi').nextOrPreviousTrack(null, 'next')
-        .then(function () {
-          // TODO FLOW TRIGGER
-        })
         .catch(
           function (err) {
             // Driver should throw user friendly errors
@@ -104,9 +95,6 @@ function parseSpeach (speech, callback) {
 
       case 'kodi_previous' :
         Homey.manager('drivers').getDriver('kodi').nextOrPreviousTrack(null, 'previous')
-        .then(function () {
-          // TODO FLOW TRIGGER
-        })
         .catch(
           function (err) {
             // Driver should throw user friendly errors
@@ -123,9 +111,100 @@ function parseSpeach (speech, callback) {
           function (err) {
             // Driver should throw user friendly errors
             Homey.manager('speech-output').say(err)
+            // 1 Retry
+            Homey.manager('speech-input').ask(__('question.latest_episode_retry'), function (err, result) {
+              if (err) {
+                Homey.manager('speech-output').say(__('talkback.something_went_wrong') + ' ' + err)
+              } else {
+                playLatestEpisode(null, result)
+                .catch(
+                  function (err) {
+                    // Driver should throw user friendly errors
+                    Homey.manager('speech-output').say(err)
+                  }
+                )
+              }
+            })
           }
         )
         return true // Only fire one trigger
+
+      case 'kodi_watch_movie' :
+        Homey.manager('speech-input').ask(__('question.what_movie'), function (err, result) {
+          if (err) {
+            Homey.manager('speech-output').say(__('talkback.something_went_wrong') + ' ' + err)
+          } else {
+            // Try to lookup the movie (result = movietitle)
+            // NOTE:	no multiple device support yet, pass null as device so 1st registered device gets picked
+            searchAndPlayMovie(null, result).catch(
+              function (err) {
+                // Driver should throw user friendly errors
+                Homey.manager('speech-output').say(err)
+              }
+            )
+          }
+        })
+        return true // Only fire  one trigger
+
+      case 'kodi_hibernate' :
+        // Confirm whether to hibernate
+        Homey.manager('speech-input').confirm(__('question.confirm_hibernate'), function (err, confirmed) {
+          if (err) {
+            Homey.manager('speech-output').say(__('talkback.something_went_wrong') + ' ' + err)
+          } else if (confirmed) {
+            // Hibernate Kodi
+            Homey.manager('drivers').getDriver('kodi').hibernateKodi(null)
+            .catch(
+              function (err) {
+                // Driver should throw user friendly errors
+                Homey.manager('speech-output').say(err)
+              }
+            )
+          } else {
+            // Don't do anything
+          }
+        })
+        return true // Only fire one trigger
+
+      case 'kodi_reboot' :
+        // Confirm whether to reboot
+        Homey.manager('speech-input').confirm(__('question.confirm_reboot'), function (err, confirmed) {
+          if (err) {
+            Homey.manager('speech-output').say(__('talkback.something_went_wrong') + ' ' + err)
+          } else if (confirmed) {
+            // Reboot Kodi
+            Homey.manager('drivers').getDriver('kodi').rebootKodi(null)
+            .catch(
+              function (err) {
+                // Driver should throw user friendly errors
+                Homey.manager('speech-output').say(err)
+              }
+            )
+          } else {
+            // Don't do anything
+          }
+        })
+        return true // Only fire trigger
+
+      case 'kodi_shutdown' :
+        // Confirm whether to reboot
+        Homey.manager('speech-input').confirm(__('question.confirm_shutdown'), function (err, confirmed) {
+          if (err) {
+            Homey.manager('speech-output').say(__('talkback.something_went_wrong') + ' ' + err)
+          } else if (confirmed) {
+            // Reboot Kodi
+            Homey.manager('drivers').getDriver('kodi').shutdownKodi(null)
+            .catch(
+              function (err) {
+                // Driver should throw user friendly errors
+                Homey.manager('speech-output').say(err)
+              }
+            )
+          } else {
+            // Don't do anything
+          }
+        })
+        return true // Only fire trigger
     }
   })
 
@@ -152,6 +231,34 @@ function onFlowActionPauseResumeKodi (callback, args) {
 function onFlowActionStopKodi (callback, args) {
   Homey.log('onFlowActionStopKodi()', args)
   Homey.manager('drivers').getDriver('kodi').stop(args.id)
+    .then(function () { callback(null, true) })
+    .catch(function (error) { callback(error) })
+}
+
+function onFlowActionPlayLatestEpisode (callback, args) {
+  Homey.log('onFlowActionPlayLatestEpisode()', args)
+  Homey.manager('drivers').getDriver('kodi').playLatestEpisode(args.id, args.series_title)
+    .then(function () { callback(null, true) })
+    .catch(function (error) { callback(error) })
+}
+
+function onFlowActionHibernate (callback, args) {
+  Homey.log('onFlowActionHibernate()', args)
+  Homey.manager('drivers').getDriver('kodi').hibernateKodi(args.id)
+    .then(function () { callback(null, true) })
+    .catch(function (error) { callback(error) })
+}
+
+function onFlowActionReboot (callback, args) {
+  Homey.log('onFlowActionReboot()', args)
+  Homey.manager('drivers').getDriver('kodi').rebootKodi(args.id)
+    .then(function () { callback(null, true) })
+    .catch(function (error) { callback(error) })
+}
+
+function onFlowActionShutdown (callback, args) {
+  Homey.log('onFlowActionShutdown()', args)
+  Homey.manager('drivers').getDriver('kodi').shutdownKodi(args.id)
     .then(function () { callback(null, true) })
     .catch(function (error) { callback(error) })
 }
