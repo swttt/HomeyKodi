@@ -1,8 +1,8 @@
 {
   "id": "nl.marvinschenkel.kodi",
   "name": {
-    "en": "Kodi for Homey",
-    "nl": "Kodi voor Homey"
+    "en": "Kodi",
+    "nl": "Kodi"
   },
   "description": {
     "en": "Control your Kodi device with Homey!",    
