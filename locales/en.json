@@ -10,6 +10,8 @@
     "no_movies_in_library": "There are no movies in your library, please add them first.",
     "no_tvshows_in_library": "There are no TV shows in your library, please add them first.",
     "no_music_in_library": "There is no music in your library, please add it first.",
+		"no_addons_installed": "There are no installed addons",
+		"addon_not_found": "I couldn't find the addon.",
     "something_went_wrong": "Oops! Something went wrong"
 	}
 	,

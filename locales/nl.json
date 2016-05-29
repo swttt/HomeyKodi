@@ -10,6 +10,8 @@
     "no_movies_in_library": "Er zijn geen films in je bibliotheek, voeg ze eerst toe.",
     "no_tvshows_in_library": "Er zijn geen series in je bibliotheek, voeg ze eerst toe",
     "no_music_in_library": "Er is geen muziek in je bibliotheek, voeg het eerst toe",
+		"no_addons_installed": "Er zijn geen addons geinstalleerd",
+		"addon_not_found": "Ik kon de addon niet vinden.",
     "something_went_wrong": "Oeps! Er ging iets fout"
 	}
 	,

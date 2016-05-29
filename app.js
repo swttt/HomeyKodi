@@ -205,6 +205,21 @@ function parseSpeach (speech, callback) {
           }
         })
         return true // Only fire trigger
+
+      case 'kodi_start_addon' :
+        // Parse the addon title from speech transcript
+        var addon = speech.transcript.replace(trigger.text, '')
+
+        // Try to lookup the movie
+        // NOTE:	no multiple device support yet, pass null as device so 1st registered device gets picked
+        searchAndStartAddon(null, addon).catch(
+          function (err) {
+            // Driver should throw user friendly errors
+            Homey.manager('speech-output').say(err)
+          }
+        )
+
+        return true // Only fire trigger
     }
   })
 
@@ -237,7 +252,7 @@ function onFlowActionStopKodi (callback, args) {
 
 function onFlowActionPlayLatestEpisode (callback, args) {
   Homey.log('onFlowActionPlayLatestEpisode()', args)
-  Homey.manager('drivers').getDriver('kodi').playLatestEpisode(args.id, args.series_title)
+  playLatestEpisode(args.id, args.series_title)
     .then(function () { callback(null, true) })
     .catch(function (error) { callback(error) })
 }
@@ -278,6 +293,24 @@ function searchAndPlayMovie (device, movieTitle) {
         // Play movie and trigger flows
         function (movie) {
           KodiDriver.playMovie(device, movie.movieid)
+        }
+    )
+    .catch(reject)
+  })
+}
+
+function searchAndStartAddon (device, addon) {
+  return new Promise(function (resolve, reject) {
+    Homey.log('searchAndStartAddon', device, addon)
+
+    // Get device from driver and play the movie
+    var KodiDriver = Homey.manager('drivers').getDriver('kodi')
+
+    KodiDriver.searchAddon(device, addon)
+      .then(
+        // Start the addon
+        function (addon) {
+          KodiDriver.startAddon(device, addon.addonid)
         }
     )
     .catch(reject)

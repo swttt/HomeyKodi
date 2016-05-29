@@ -504,28 +504,84 @@ module.exports.playEpisode = function (deviceSearchParameters, episode) {
   })
 }
 
-// Return the Kodi device specified by the search parameters
-function getKodiInstance (searchParameters) {
+/* **********************************
+  SEARCH ADDON
+************************************/
+module.exports.searchAddon = function (deviceSearchParameters, addonName) {
   return new Promise(function (resolve, reject) {
-    console.log('getKodiInstance', searchParameters)
-    // If only 1 registered device, just return it
-    var device = null
-    if (registeredDevices.length === 1 || searchParameters === null) {
-      device = registeredDevices[0]
-    } else {
-      // Search parameters have been provided, look for a device with the supplied ID
-      registeredDevices.filter(function (item) {
-        return item.id === searchParameters
-      })
-    }
+    console.log('searchAddon()', deviceSearchParameters, addonName)
 
-    if (device) {
-      resolve(device)
-    } else {
-      reject(__('talkback.device_not_found'))
-    }
+    // search Kodi instance by deviceSearchParameters
+    getKodiInstance(deviceSearchParameters)
+      .then(function (kodi) {
+        var params = {
+          properties: ['name']
+        }
+        // Get all the addons and fuzzy search for the one we need
+        kodi.run('Addons.GetAddons', params)
+          .then(function (result) {
+            if (result.addons) { // Check whether there are TV shows in the library
+              // Parse the result and look for movieTitle
+              // Set option for fuzzy search
+              var options = {
+                caseSensitive: false, // Don't care about case whenever we're searching titles by speech
+                includeScore: false, // Don't need the score, the first item has the highest probability
+                shouldSort: true, // Should be true, since we want result[0] to be the item with the highest probability
+                threshold: 0.4, // 0 = perfect match, 1 = match all..
+                location: 0,
+                distance: 100,
+                maxPatternLength: 64,
+                keys: ['name']
+              }
+
+              // Create the fuzzy search object
+              var fuse = new Fuse(result.addons, options)
+              var addonNameResult = fuse.search(addonName.trim())
+
+              // If there's a result
+              if (addonNameResult.length > 0) {
+                resolve(addonNameResult[0]) // Always use searchResult[0], this is the result with the highest probability (setting shouldSort = true)
+              } else {
+                reject(__('talkback.addon_not_found'))
+              }
+              console.log(addonNameResult)
+            } else {
+              // No TV Shows in the library
+              reject(__('talkback.no_addons_installed'))
+            }
+          })
+      })
   })
 }
+
+/* **********************************
+  START ADDON
+************************************/
+module.exports.startAddon = function (deviceSearchParameters, addonId) {
+  // Kodi API: Addons.ExecuteAddon
+  return new Promise(function (resolve, reject) {
+    console.log('startAddon()', deviceSearchParameters, addonId)
+    // search Kodi instance by deviceSearchParameters
+    getKodiInstance(deviceSearchParameters)
+      .then(function (kodi) {
+        // Build the parameter to start the addon
+        var param = {
+          addonid: addonId
+        }
+
+        kodi.run('Addons.ExecuteAddon', param)
+          .then(function (result) {
+            console.log('result', result)
+            resolve(kodi)
+          })
+          .catch(function (err) {
+            console.log('err', err)
+          })
+      })
+      .catch(reject)
+  })
+}
+
 /* **********************************
   SYSTEM FUNCTIONS
 ************************************/
@@ -588,6 +644,29 @@ function deleteDevice (deviceId) {
   })
 }
 
+// Return the Kodi device specified by the search parameters
+function getKodiInstance (searchParameters) {
+  return new Promise(function (resolve, reject) {
+    console.log('getKodiInstance', searchParameters)
+    // If only 1 registered device, just return it
+    var device = null
+    if (registeredDevices.length === 1 || searchParameters === null) {
+      device = registeredDevices[0]
+    } else {
+      // Search parameters have been provided, look for a device with the supplied ID
+      registeredDevices.filter(function (item) {
+        return item.id === searchParameters
+      })
+    }
+
+    if (device) {
+      resolve(device)
+    } else {
+      reject(__('talkback.device_not_found'))
+    }
+  })
+}
+
 /* **********************************
   KODI EVENT LISTENERS
     - All functions related to event handling
@@ -641,7 +720,7 @@ function startListeningForEvents (device) {
 }
 
 function onKodiGenericEvent (result, device, triggerName) {
-  console.log('onKodiPause()')
+  console.log('onKodiGenericEvent() ', triggerName)
   // Trigger the flow
   console.log('Triggering flow ', triggerName)
   Homey.manager('flow').triggerDevice(triggerName, null, null, device.id)
@@ -651,8 +730,9 @@ function onKodiPlay (result, device) {
   console.log('onKodiPlay()')
   // Check if there's a new song/movie/episode playback or a resume action (player % > 1)
   // Build request parameters and supply the player
+  console.log('result', result)
   var params = {
-    playerid: result.data.player.playerid,
+    playerid: result.data.player.playerid === -1 ? 1 : result.data.player.playerid, // Convert -1 to 1 if player is an Addon (Exodus / Specto)
     properties: ['percentage']
   }
   device.run('Player.GetProperties', params)
@@ -664,21 +744,30 @@ function onKodiPlay (result, device) {
           Homey.manager('flow').triggerDevice('kodi_resume', null, null, device.id)
           // Check the playback type (movie or episode)
         } else if (result.data.item.type === 'movie' || result.data.item.type === 'movies') {
-          // Get movie title
-          var movieParams = {
-            movieid: result.data.item.id,
-            properties: ['title']
+          // Check if we get a title from Kodi
+          if (result.data.item.title) {
+            console.log('Triggering flow kodi_movie_start')
+            Homey.manager('flow').triggerDevice('kodi_movie_start', {
+              // Pass movie title as flow token
+              movie_title: result.data.item.title
+            }, null, device.id)
+          } else {
+            var movieParams = {
+              movieid: result.data.item.id,
+              properties: ['title']
+            }
+            // Else get the title by id
+            device.run('VideoLibrary.GetMovieDetails', movieParams)
+              .then(function (movieResult) {
+                // Trigger appropriate flows
+                Homey.log('Triggering flow kodi_movie_start, movie_title: ', movieResult.moviedetails.label)
+                // Trigger flows and pass variables
+                Homey.manager('flow').triggerDevice('kodi_movie_start', {
+                  // Pass movie title as flow token
+                  movie_title: movieResult.moviedetails.label
+                }, null, device.id)
+              })
           }
-          device.run('VideoLibrary.GetMovieDetails', movieParams)
-            .then(function (movieResult) {
-              // Trigger appropriate flows
-              Homey.log('Triggering flow kodi_movie_start, movie_title: ', movieResult.moviedetails.label)
-              // Trigger flows and pass variables
-              Homey.manager('flow').triggerDevice('kodi_movie_start', {
-                // Pass movie title as flow token
-                movie_title: movieResult.moviedetails.label
-              }, null, device.id)
-            })
         } else if (result.data.item.type === 'episode' || result.data.item.type === 'episodes') {
           // Get Episode details
           var episodeParams = {
