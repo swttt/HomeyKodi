@@ -9,6 +9,7 @@ Currently working:
 - Playing tv shows via speech
   - Latest unwatched episode of a tv show
 - Play / pause / stop through speech
+- Starting addons
 - Various flow triggers / actions
 - Auto reconnection when Kodi has shutdown
 
@@ -24,6 +25,7 @@ EN
 * "Stop"
 * "Shutdown / Hibernate / Reboot Kodi"
 * "I want to watch a movie"
+* "Start addon / program Exodus"
 
 NL
 * "Start film / Speel film Finding Nemo"
@@ -37,6 +39,7 @@ NL
 * "Slaap kodi"
 * "Kodi afsluiten / herstarten"
 * "Ik wil een film kijken"
+* "Start addon / programma Exodus"
 
 ### Flow support
 *Triggers*
