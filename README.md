@@ -66,7 +66,7 @@ Flows are now triggered whenever something happens on Kodi, whether this has bee
 
 ### Donate
 IF   (you think this app is awesome)
-THEN "OK Homey, Donate some money to Marvin for all his hard work"
+THEN "OK Homey, Buy Marvin a beer for all his hard work"
 [![Paypal donate][pp-donate-image]][pp-donate-link]
 
 [pp-donate-link]: https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=D7H2GG32VETVW&lc=AU&item_number=homey%2dapps&currency_code=AUD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHosted
