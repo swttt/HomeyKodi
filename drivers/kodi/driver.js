@@ -5,7 +5,28 @@ var KodiWs = require('node-kodi-ws')
 var Fuse = require('fuse.js')
 var Utils = require('../../libs/utils')
 
+// Keep track of registered devices
 var registeredDevices = []
+
+// Init the logging
+console.log = function () {
+  // Save log message to settings
+  // Retreive current logs
+  let currentLogs = Homey.manager('settings').get('currentLogs')
+  if (!currentLogs) currentLogs = []
+
+  // Push new event, remove items over 50 and save new array. Use JSON Stringify to make sure objects are logged properly 
+  let logArguments = Array.from(arguments)
+  logArguments.forEach(function (part, index, theArray) {
+    theArray[index] = JSON.stringify(part)
+  })
+  currentLogs.push({datetime: new Date(), message: logArguments.join(' ')})
+  if (currentLogs.length > 50) currentLogs.splice(0, 1)
+  Homey.manager('settings').set('currentLogs', currentLogs)
+
+  // Output to console as well
+  this.apply(console, arguments)
+}.bind(console.log)
 
 // Export capabilities
 module.exports.capabilities = {}

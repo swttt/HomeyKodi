@@ -54,5 +54,10 @@
 			"could_not_connect": "Could not connect to your Kodi! Please verify your details.",
 			"succesfully_connected": "Connection succesful!"
 		}
+	 },
+	 "settings":{
+		 "title": "Kodi settings",
+		 "loglegend":"Logs",
+		 "intro": "This page shows the last 50 log items logged by the Kodi app. If you have any issues with the app, this logging information will provide you some guidance to help you solve the problem."
 	 }
 }

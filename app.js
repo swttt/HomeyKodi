@@ -226,7 +226,6 @@ function parseSpeach (speech, callback) {
         // Try to look up any new movies
         Homey.manager('drivers').getDriver('kodi').getNewestMovies(null, 7)
           .then(function (movies) {
-            console.log('jooo')
             Homey.manager('speech-output').say(__('talkback.found_following_movies'))
             movies.forEach(function (movie) {
               Homey.manager('speech-output').say(movie.label)
