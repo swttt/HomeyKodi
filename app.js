@@ -116,6 +116,7 @@ function parseSpeach (speech, callback) {
               if (err) {
                 Homey.manager('speech-output').say(__('talkback.something_went_wrong') + ' ' + err)
               } else {
+                console.log('result:', result)
                 playLatestEpisode(null, result)
                 .catch(
                   function (err) {
@@ -218,6 +219,26 @@ function parseSpeach (speech, callback) {
             Homey.manager('speech-output').say(err)
           }
         )
+
+        return true // Only fire trigger
+
+      case 'kodi_new_movies' :
+        // Try to look up any new movies
+        Homey.manager('drivers').getDriver('kodi').getNewestMovies(null, 7)
+          .then(function (movies) {
+            console.log('jooo')
+            Homey.manager('speech-output').say(__('talkback.found_following_movies'))
+            movies.forEach(function (movie) {
+              Homey.manager('speech-output').say(movie.label)
+            })
+          })
+          .catch(
+            function (err) {
+              console.log('error', err)
+              // Driver should throw user friendly errors
+              Homey.manager('speech-output').say(err)
+            }
+          )
 
         return true // Only fire trigger
     }

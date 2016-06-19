@@ -24,28 +24,24 @@
 		var ipAddress = $("#ip_address").val();		
 		var tcpPort = $("#tcpPort").val();
 	
-		var params = {
-			name: name,
-			host: ipAddress,
-			tcpPort: tcpPort
-		}	
-		
-		Homey.emit( 'configure_kodi', params, function ( err, result ) {
+		var device = {
+				data: { // this data object is saved to- and unique for the device. It is passed on the get and set functions as 1st argument
+					id: ipAddress // something unique, so your driver knows which physical device it is. A MAC address or Node ID, for example. This is required
+				},
+				name: name, // the name for this device (optional),
+				settings: { 
+					host: ipAddress,		
+					tcpport: tcpPort
+				} // initial settings (optional)
+			}
+		console.log('device', device)
+		Homey.emit( 'configure_kodi', device, function ( err, result ) {
 			if(err) {
 				$('.kodi-err-msg').text(err)
 			}
 			else {
 				//Successfully connected
-				Homey.addDevice({
-					data: { // this data object is saved to- and unique for the device. It is passed on the get and set functions as 1st argument
-						id: ipAddress // something unique, so your driver knows which physical device it is. A MAC address or Node ID, for example. This is required
-					},
-					name: name, // the name for this device (optional),
-					settings: { 
-						host: ipAddress,		
-            tcpport: tcpPort
-					} // initial settings (optional)
-				}, function( err, result ){
+				Homey.addDevice(device, function( err, result ){
 					if( err ) return console.error(err);
 				});
 				

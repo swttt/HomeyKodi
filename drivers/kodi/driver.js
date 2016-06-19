@@ -23,6 +23,7 @@ module.exports.init = function (devices, callback) {
         // Keep track of the device id and name
         connection.id = settings.host
         connection.tcpport = settings.tcpport
+        connection.device_data = device.data
         // Register the device
         registeredDevices.push(connection)
         // Start listening for Kodi events
@@ -40,14 +41,15 @@ module.exports.init = function (devices, callback) {
 // Pairing functionality
 module.exports.pair = function (socket) {
   // Link the configure function to the front end
-  socket.on('configure_kodi', function (data, callback) {
+  socket.on('configure_kodi', function (device, callback) {
     // data contains connections data of kodi
     // Try to connect and register device
-    KodiWs(data.host, data.tcpPort)
+    KodiWs(device.settings.host, device.settings.tcpport)
     .then(function (connection) {
       // Keep track of device id
-      connection.id = data.host
-      connection.tcpport = data.tcpPort
+      connection.id = device.settings.host
+      connection.tcpport = device.settings.tcpport
+      connection.device_data = device.data
       // Register the device
       registeredDevices.push(connection)
       // Start listening for Kodi events
@@ -82,6 +84,7 @@ module.exports.settings = function (device_data, newSettingsObj, oldSettingsObj,
       // Keep track of the device id and port
       connection.id = newSettingsObj.host
       connection.tcpport = newSettingsObj.tcpport
+      connection.device_data = device_data
       // Register the new settings of device
       registeredDevices.push(connection)
       // Start listening for Kodi events
@@ -583,6 +586,40 @@ module.exports.startAddon = function (deviceSearchParameters, addonId) {
 }
 
 /* **********************************
+  GET LATEST MOVIES
+************************************/
+module.exports.getNewestMovies = function (deviceSearchParameters, daysSince) {
+  return new Promise(function (resolve, reject) {
+    console.log('getNewestMovies()', deviceSearchParameters, daysSince)
+
+    // search Kodi instance by deviceSearchParameters
+    getKodiInstance(deviceSearchParameters)
+      .then(function (kodi) {
+        let params = {
+          filter: {
+            operator: 'greaterthan',
+            field: 'dateadded',
+            value: '2016-04-31' // TODO > Setting
+          }
+        }
+
+        // Kodi API: VideoLibrary.GetMovies
+        kodi.run('VideoLibrary.GetMovies', params)
+          .then(function (result) {
+            console.log(result)
+            if (result.movies) { // Check if there are movies in the media library
+              resolve(result.movies)
+            } else {
+              // No movies in media libary, throw an error
+              reject(__('talkback.no_new_movies_in_library'))
+            }
+          })
+      })
+      .catch(reject)
+  })
+}
+
+/* **********************************
   SYSTEM FUNCTIONS
 ************************************/
 module.exports.shutdownKodi = function (deviceSearchParameters) {
@@ -594,7 +631,6 @@ module.exports.shutdownKodi = function (deviceSearchParameters) {
       .then(function (kodi) {
         kodi.run('System.Shutdown')
           .then(function (result) {
-            // Episode started playing succesfully, return device for flow handling
             resolve(kodi)
           })
       })
@@ -611,7 +647,6 @@ module.exports.rebootKodi = function (deviceSearchParameters) {
       .then(function (kodi) {
         kodi.run('System.Reboot')
           .then(function (result) {
-            // Episode started playing succesfully, return device for flow handling
             resolve(kodi)
           })
       })
@@ -628,7 +663,6 @@ module.exports.hibernateKodi = function (deviceSearchParameters) {
       .then(function (kodi) {
         kodi.run('System.Hibernate')
           .then(function (result) {
-            // Episode started playing succesfully, return device for flow handling
             resolve(kodi)
           })
       })
@@ -682,7 +716,7 @@ function startListeningForEvents (device) {
   device.notification('System.OnRestart', function (result) { onKodiGenericEvent(result, device, 'kodi_reboot') })
   device.notification('System.OnWake', function (result) { onKodiGenericEvent(result, device, 'kodi_wake') })
 
-  // Catch error when Kodi power is shutdown
+  // Catch error when Kodi suddenly goes offline to prevent the app from crashing
   device.on('error', function (error) {
     console.log('Kodi connection error: ', error)
   })
@@ -723,7 +757,7 @@ function onKodiGenericEvent (result, device, triggerName) {
   console.log('onKodiGenericEvent() ', triggerName)
   // Trigger the flow
   console.log('Triggering flow ', triggerName)
-  Homey.manager('flow').triggerDevice(triggerName, null, null, device.id)
+  Homey.manager('flow').triggerDevice(triggerName, null, null, device.device_data)
 }
 
 function onKodiPlay (result, device) {
@@ -741,16 +775,16 @@ function onKodiPlay (result, device) {
       if (playerResult) {
         if (playerResult.percentage >= 0.1) {
           console.log('Triggering flow kodi_resume')
-          Homey.manager('flow').triggerDevice('kodi_resume', null, null, device.id)
+          Homey.manager('flow').triggerDevice('kodi_resume', null, null, device.device_data)
           // Check the playback type (movie or episode)
         } else if (result.data.item.type === 'movie' || result.data.item.type === 'movies') {
           // Check if we get a title from Kodi
           if (result.data.item.title) {
-            console.log('Triggering flow kodi_movie_start')
+            console.log('Triggering flow kodi_movie_start for device', device.id)
             Homey.manager('flow').triggerDevice('kodi_movie_start', {
               // Pass movie title as flow token
               movie_title: result.data.item.title
-            }, null, device.id)
+            }, null, device.device_data)
           } else {
             var movieParams = {
               movieid: result.data.item.id,
@@ -760,12 +794,12 @@ function onKodiPlay (result, device) {
             device.run('VideoLibrary.GetMovieDetails', movieParams)
               .then(function (movieResult) {
                 // Trigger appropriate flows
-                Homey.log('Triggering flow kodi_movie_start, movie_title: ', movieResult.moviedetails.label)
+                Homey.log('Triggering flow kodi_movie_start, movie_title: ', movieResult.moviedetails.label, 'device: ', device.device_data)
                 // Trigger flows and pass variables
                 Homey.manager('flow').triggerDevice('kodi_movie_start', {
                   // Pass movie title as flow token
                   movie_title: movieResult.moviedetails.label
-                }, null, device.id)
+                }, null, device.device_data)
               })
           }
         } else if (result.data.item.type === 'episode' || result.data.item.type === 'episodes') {
@@ -783,7 +817,7 @@ function onKodiPlay (result, device) {
                 episode_title: episodeResult.episodedetails.label,
                 season: episodeResult.episodedetails.season,
                 episode: episodeResult.episodedetails.episode
-              }, null, device.id)
+              }, null, device.device_data)
             })
         }
       }

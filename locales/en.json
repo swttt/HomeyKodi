@@ -12,6 +12,8 @@
     "no_music_in_library": "There is no music in your library, please add it first.",
 		"no_addons_installed": "There are no installed addons",
 		"addon_not_found": "I couldn't find the addon.",
+		"no_new_movies_in_library": "Nope, there are no new movies in your library",		
+		"found_following_movies": "I found the following new movies in your library",
     "something_went_wrong": "Oops! Something went wrong"
 	}
 	,

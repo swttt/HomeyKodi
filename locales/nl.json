@@ -12,6 +12,8 @@
     "no_music_in_library": "Er is geen muziek in je bibliotheek, voeg het eerst toe",
 		"no_addons_installed": "Er zijn geen addons geinstalleerd",
 		"addon_not_found": "Ik kon de addon niet vinden.",
+		"no_new_movies_in_library": "Nee, er zijn geen nieuwe films in je bibliotheek",
+		"found_following_movies": "De volgende films zijn nieuw in je bibliotheek",
     "something_went_wrong": "Oeps! Er ging iets fout"
 	}
 	,
