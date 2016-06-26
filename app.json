@@ -8,7 +8,7 @@
     "en": "Control your Kodi device with Homey!",    
     "nl": "Bestuur je Kodi apparaat met Homey!"
   },
-  "version": "1.3.1",
+  "version": "1.4.0",
   "compatibility": ">=0.8.32 || 1.x",
   "category": [
     "music",
@@ -231,10 +231,101 @@
         ]
       },
       {
+        "id":"kodi_movie_stop",
+        "title": {
+          "en":"A movie has stopped",          
+          "nl":"Een film stopt"
+        },
+        "args": [
+          {
+            "name": "kodi",
+            "type": "device",
+            "filter": "driver_uri=homey:app:nl.marvinschenkel.kodi&driver_id=kodi",
+            "placeholder": { 
+              "en": "Which Kodi device", 
+              "nl": "Welk Kodi apparaat" 
+             }
+          }
+        ],
+        "tokens":[
+          {
+            "name":"movie_title",
+            "title": {
+              "en":"Title",
+              "nl":"Titel"
+            },
+            "example":{
+              "en":"Finding Nemo",
+              "nl":"Finding Nemo"
+            }
+          }
+        ]
+      },
+      {
         "id":"kodi_episode_start",
         "title": {
           "en":"An episode has started",
           "nl":"Een aflevering begint"
+        },
+        "args": [
+          {
+            "name": "kodi",
+            "type": "device",
+            "filter": "driver_uri=homey:app:nl.marvinschenkel.kodi&driver_id=kodi"
+          }
+        ],
+        "tokens":[
+          {
+            "name":"tvshow_title",
+            "title": {
+              "en":"Show",
+              "nl":"Serie"
+            },
+            "example":{
+              "en":"The Walking Dead",
+              "nl":"The Walking Dead"
+            }
+          },
+          {
+            "name":"episode_title",
+            "title": {
+              "en":"Episode",
+              "nl":"Aflevering"
+            },
+            "example":{
+              "en":"First Time Again",
+              "nl":"First Time Again"
+            }
+          },
+          {
+            "name":"season",
+            "title": {
+              "en":"Sea #",
+              "nl":"Sei #"
+            },
+            "example":{
+              "en":"1",
+              "nl":"1"
+            }
+          },
+          {
+            "name":"episode",
+            "title": {
+              "en":"Ep #",
+              "nl":"Afl #"
+            },
+            "example":{
+              "en":"2",
+              "nl":"2"
+            }
+          }
+        ]
+      },
+      {
+        "id":"kodi_episode_stop",
+        "title": {
+          "en":"An episode has stopped",
+          "nl":"Een aflevering stopt"
         },
         "args": [
           {

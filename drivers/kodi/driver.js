@@ -15,7 +15,7 @@ console.log = function () {
   let currentLogs = Homey.manager('settings').get('currentLogs')
   if (!currentLogs) currentLogs = []
 
-  // Push new event, remove items over 50 and save new array. Use JSON Stringify to make sure objects are logged properly 
+  // Push new event, remove items over 50 and save new array. Use JSON Stringify to make sure objects are logged properly
   let logArguments = Array.from(arguments)
   logArguments.forEach(function (part, index, theArray) {
     theArray[index] = JSON.stringify(part)
@@ -40,19 +40,27 @@ module.exports.init = function (devices, callback) {
         callback(err, null)
       }
       // Try to connect and register device using websockets
-      KodiWs(settings.host, settings.tcpport).then(function (connection) {
-        // Keep track of the device id and name
-        connection.id = settings.host
-        connection.tcpport = settings.tcpport
-        connection.device_data = device.data
-        // Register the device
-        registeredDevices.push(connection)
-        // Start listening for Kodi events
-        startListeningForEvents(connection)
-      })
-      .catch(function (err) {
-        console.error(err)
-      })
+      // Try to reconnect every 10sec
+      function reconnect () {
+        console.log('Trying to reconnect')
+        KodiWs(settings.host, settings.tcpport)
+        .then(function (connection) {
+          // Keep track of device id
+          connection.id = settings.host
+          connection.tcpport = settings.tcpport
+          connection.device_data = device.data
+          // Register the device
+          registeredDevices.push(connection)
+          // Start listening for Kodi events
+          startListeningForEvents(connection)
+        })
+        .catch(function (err) {
+          console.log('Stil cannot reconnect: ', err)
+          setTimeout(reconnect, 10000)
+        })
+      }
+
+      reconnect()
     })
   })
 
@@ -731,7 +739,7 @@ function startListeningForEvents (device) {
   // Map supported Kodi events to indidual functions and pass the device connection to trigger the appropriate flows
   device.notification('Player.OnPause', function (result) { onKodiGenericEvent(result, device, 'kodi_pause') })
   device.notification('Player.OnPlay', function (result) { onKodiPlay(result, device) })
-  device.notification('Player.OnStop', function (result) { onKodiGenericEvent(result, device, 'kodi_stop') })
+  device.notification('Player.OnStop', function (result) { onKodiStop(result, device, 'kodi_stop') })
   device.notification('System.OnQuit', function (result) { onKodiGenericEvent(result, device, 'kodi_shutdown') })
   device.notification('System.OnSleep', function (result) { onKodiGenericEvent(result, device, 'kodi_hibernate') })
   device.notification('System.OnRestart', function (result) { onKodiGenericEvent(result, device, 'kodi_reboot') })
@@ -759,6 +767,7 @@ function startListeningForEvents (device) {
         // Keep track of device id
         connection.id = host
         connection.tcpport = tcpport
+        connection.device_data = device.data
         // Register the device
         registeredDevices.push(connection)
         // Start listening for Kodi events
@@ -776,16 +785,63 @@ function startListeningForEvents (device) {
 
 function onKodiGenericEvent (result, device, triggerName) {
   console.log('onKodiGenericEvent() ', triggerName)
+  console.log(result)
   // Trigger the flow
   console.log('Triggering flow ', triggerName)
   Homey.manager('flow').triggerDevice(triggerName, null, null, device.device_data)
+}
+
+function onKodiStop (result, device) {
+  console.log('onKodiStop')
+  // Check if the user stopped a movie/episode halfway or whether the episode/movie actually ended
+  if (result.data.end === true) {
+    if (result.data.item.type === 'episode' || result.data.item.type === 'episodes') {
+      // Episode ended
+      // Get Episode details
+      var episodeParams = {
+        episodeid: result.data.item.id,
+        properties: ['showtitle', 'season', 'episode', 'title']
+      }
+      device.run('VideoLibrary.GetEpisodeDetails', episodeParams)
+        .then(function (episodeResult) {
+          // Trigger action kodi_episode_start
+          Homey.log('Triggering flow kodi_episode_stop, tvshow_title: ', episodeResult.episodedetails.showtitle, 'episode_title: ', episodeResult.episodedetails.label, 'season: ', episodeResult.episodedetails.season, 'episode: ', episodeResult.episodedetails.episode)
+          Homey.manager('flow').triggerDevice('kodi_episode_stop', {
+            tvshow_title: episodeResult.episodedetails.showtitle,
+            episode_title: episodeResult.episodedetails.label,
+            season: episodeResult.episodedetails.season,
+            episode: episodeResult.episodedetails.episode
+          }, null, device.device_data)
+        })
+    } else {
+      // A movie ended
+      var movieParams = {
+        movieid: result.data.item.id,
+        properties: ['title']
+      }
+      // Else get the title by id
+      device.run('VideoLibrary.GetMovieDetails', movieParams)
+        .then(function (movieResult) {
+          // Trigger appropriate flows
+          Homey.log('Triggering flow kodi_movie_stop, movie_title: ', movieResult.moviedetails.label, 'device: ', device.device_data)
+          // Trigger flows and pass variables
+          Homey.manager('flow').triggerDevice('kodi_movie_stop', {
+            // Pass movie title as flow token
+            movie_title: movieResult.moviedetails.label
+          }, null, device.device_data)
+        })
+    }
+  } else {
+    // User stopped, trigger normal stop event
+    console.log('Triggering flow ', 'kodi_stop')
+    Homey.manager('flow').triggerDevice('kodi_stop', null, null, device.device_data)
+  }
 }
 
 function onKodiPlay (result, device) {
   console.log('onKodiPlay()')
   // Check if there's a new song/movie/episode playback or a resume action (player % > 1)
   // Build request parameters and supply the player
-  console.log('result', result)
   var params = {
     playerid: result.data.player.playerid === -1 ? 1 : result.data.player.playerid, // Convert -1 to 1 if player is an Addon (Exodus / Specto)
     properties: ['percentage']

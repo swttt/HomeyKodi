@@ -44,10 +44,12 @@ NL
 ### Flow support
 *Triggers*
 * On movie start
+* On movie stop (when a movie ends, including credits)
 * On episode start
+* On episode stop (when an episode, including credits)
 * On pause  
 * On resume 
-* On stop 
+* On stop (when you press stop)
 * On reboot
 * On shutdown
 * On hibernate
