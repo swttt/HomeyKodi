@@ -43,7 +43,7 @@
 		"authorization": {
 			"configure": "Configureer Kodi",
 			"start_configuration":"Opslaan!",
-			"configuration_explanation": "Voer je Kodi connectie details in! <br />Deze kun je vinden onder System > Systeeminformatie. <br />Zorg er ook voor dat de optie 'Sta externe programmas toe om Kodi te besturen' aan staat onder System/Settings/Network/Services. Herstart Kodi na het aanzetten van deze optie."
+			"configuration_explanation": "Voer je Kodi connectie details in! <br />Deze kun je vinden onder System > Systeeminformatie. <br />Zorg er ook voor dat de optie 'Sta externe programmas toe om Kodi te besturen' aan staat onder System/Settings/Network/Services. Herstart Kodi na het aanzetten van deze optie. Zorg er ook voor dat je HTTP poort niet hetzelfde is als je TCP poort (9090)!"
 		},
     "configuration": {
        "name": "Naam",

@@ -8,8 +8,8 @@
     "en": "Control your Kodi device with Homey!",    
     "nl": "Bestuur je Kodi apparaat met Homey!"
   },
-  "version": "1.4.0",
-  "compatibility": ">=0.8.32 || 1.x",
+  "version": "1.4.1",
+  "compatibility": ">=0.9 || 1.x",
   "category": [
     "music",
     "video"
@@ -152,8 +152,8 @@
         "large": "./drivers/kodi/assets/images/large.png",
         "small": "./drivers/kodi/assets/images/small.png"
       },
-      "class": "videoplayer",
-      "capabilities": [ "play", "pause", "stop" ],
+      "class": "other",
+      "capabilities": [],
       "pair": [
         {
           "id": "configure_kodi"

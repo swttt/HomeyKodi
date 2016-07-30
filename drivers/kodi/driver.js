@@ -28,9 +28,6 @@ console.log = function () {
   this.apply(console, arguments)
 }.bind(console.log)
 
-// Export capabilities
-module.exports.capabilities = {}
-
 module.exports.init = function (devices, callback) {
   // Initiate a Kodi instance for each registered device
   devices.forEach(function (device) {
