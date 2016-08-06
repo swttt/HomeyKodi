@@ -8,7 +8,7 @@
     "en": "Control your Kodi device with Homey!",    
     "nl": "Bestuur je Kodi apparaat met Homey!"
   },
-  "version": "1.4.1",
+  "version": "1.4.2",
   "compatibility": ">=0.9 || 1.x",
   "category": [
     "music",
@@ -175,6 +175,7 @@
             {
               "id": "host",
               "type": "text",
+              "value":"0.0.0.0",
               "label": {
                 "en": "(Local) IP Address of Kodi",
                 "nl": "(Lokale) IP adres van Kodi"
@@ -183,6 +184,7 @@
             {
               "id": "tcpport",
               "type": "text",
+              "value":"9090",
               "label": {
                 "en": "TCP Port",
                 "nl": "TCP Poort"
