@@ -142,55 +142,19 @@
     }
     
   ],
-  "capabilities": {
-      "currently_playing": {
-          "type": "string",
-          "title": {
-              "en": "Currently playing",
-              "nl": "Speelt nu af"
-          },
-          "units": {
-              "en": "",
-              "nl": ""
-          },
-          "desc": {
-              "en": "",
-              "nl": ""
-          },
-          "getable": true,
-          "setable": true
-      }
-    },
   "drivers": [
     {
       "id": "kodi",
       "name": {
         "en": "Kodi"
       },
-      "mobile": {
-        "components": [
-            {
-              "id": "icon",
-              "capabilities": [  ]
-            },
-            {
-              "id": "currently_playing",
-              "capabilities": [ "currently_playing" ],
-              "options": {
-                  "icons": {
-                      "currently_playing": "./assets/icon.svg"
-                    }
-                  }
-            }
-          ]
-        },
       "images": {
         "large": "./drivers/kodi/assets/images/large.png",
         "small": "./drivers/kodi/assets/images/small.png"
       },
       "class": "other",
       
-      "capabilities": [ "currently_playing" ],
+      "capabilities": [ ],
       "pair": [
         {
           "id": "configure_kodi"

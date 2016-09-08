@@ -61,13 +61,8 @@ module.exports.init = function (devices, callback) {
     })
   })
 
-  callback()
-}
 
-module.exports.capabilities = {}
-module.exports.capabilities.currently_playing = {}
-module.exports.capabilities.currently_playing.get = function (device_data, callback) {
-  return callback(null, 'Finding Nemo')
+  callback()
 }
 
 // Pairing functionality
