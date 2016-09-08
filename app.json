@@ -8,7 +8,7 @@
     "en": "Control your Kodi device with Homey!",    
     "nl": "Bestuur je Kodi apparaat met Homey!"
   },
-  "version": "1.4.2",
+  "version": "1.5.0",
   "compatibility": ">=0.9 || 1.x",
   "category": [
     "music",
@@ -142,18 +142,55 @@
     }
     
   ],
+  "capabilities": {
+      "currently_playing": {
+          "type": "string",
+          "title": {
+              "en": "Currently playing",
+              "nl": "Speelt nu af"
+          },
+          "units": {
+              "en": "",
+              "nl": ""
+          },
+          "desc": {
+              "en": "",
+              "nl": ""
+          },
+          "getable": true,
+          "setable": true
+      }
+    },
   "drivers": [
     {
       "id": "kodi",
       "name": {
         "en": "Kodi"
       },
+      "mobile": {
+        "components": [
+            {
+              "id": "icon",
+              "capabilities": [  ]
+            },
+            {
+              "id": "currently_playing",
+              "capabilities": [ "currently_playing" ],
+              "options": {
+                  "icons": {
+                      "currently_playing": "./assets/icon.svg"
+                    }
+                  }
+            }
+          ]
+        },
       "images": {
         "large": "./drivers/kodi/assets/images/large.png",
         "small": "./drivers/kodi/assets/images/small.png"
       },
       "class": "other",
-      "capabilities": [],
+      
+      "capabilities": [ "currently_playing" ],
       "pair": [
         {
           "id": "configure_kodi"
@@ -380,6 +417,20 @@
               "en":"2",
               "nl":"2"
             }
+          }
+        ]
+      },
+      {
+        "id":"kodi_playing_something",
+        "title": {
+          "en":"Kodi starts playing something",
+          "nl": "Kodi start met iets afspelen"
+        },
+        "args": [
+          {
+            "name": "kodi",
+            "type": "device",
+            "filter": "driver_uri=homey:app:nl.marvinschenkel.kodi&driver_id=kodi"
           }
         ]
       },

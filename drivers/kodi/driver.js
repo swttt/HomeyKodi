@@ -41,20 +41,20 @@ module.exports.init = function (devices, callback) {
       function reconnect () {
         console.log('Trying to reconnect')
         KodiWs(settings.host, settings.tcpport)
-        .then(function (connection) {
-          // Keep track of device id
-          connection.id = settings.host
-          connection.tcpport = settings.tcpport
-          connection.device_data = device.data
-          // Register the device
-          registeredDevices.push(connection)
-          // Start listening for Kodi events
-          startListeningForEvents(connection)
-        })
-        .catch(function (err) {
-          console.log('Stil cannot reconnect: ', err)
-          setTimeout(reconnect, 10000)
-        })
+          .then(function (connection) {
+            // Keep track of device id
+            connection.id = settings.host
+            connection.tcpport = settings.tcpport
+            connection.device_data = device.data
+            // Register the device
+            registeredDevices.push(connection)
+            // Start listening for Kodi events
+            startListeningForEvents(connection)
+          })
+          .catch(function (err) {
+            console.log('Stil cannot reconnect: ', err)
+            setTimeout(reconnect, 10000)
+          })
       }
 
       reconnect()
@@ -64,6 +64,12 @@ module.exports.init = function (devices, callback) {
   callback()
 }
 
+module.exports.capabilities = {}
+module.exports.capabilities.currently_playing = {}
+module.exports.capabilities.currently_playing.get = function (device_data, callback) {
+  return callback(null, 'Finding Nemo')
+}
+
 // Pairing functionality
 module.exports.pair = function (socket) {
   // Link the configure function to the front end
@@ -71,20 +77,20 @@ module.exports.pair = function (socket) {
     // data contains connections data of kodi
     // Try to connect and register device
     KodiWs(device.settings.host, device.settings.tcpport)
-    .then(function (connection) {
-      // Keep track of device id
-      connection.id = device.settings.host
-      connection.tcpport = device.settings.tcpport
-      connection.device_data = device.data
-      // Register the device
-      registeredDevices.push(connection)
-      // Start listening for Kodi events
-      startListeningForEvents(connection)
-      callback(null, __('pair.feedback.succesfully_connected'))
-    })
-    .catch(function (err) {
-      callback(__('pair.feedback.could_not_connect') + ' ' + err)
-    })
+      .then(function (connection) {
+        // Keep track of device id
+        connection.id = device.settings.host
+        connection.tcpport = device.settings.tcpport
+        connection.device_data = device.data
+        // Register the device
+        registeredDevices.push(connection)
+        // Start listening for Kodi events
+        startListeningForEvents(connection)
+        callback(null, __('pair.feedback.succesfully_connected'))
+      })
+      .catch(function (err) {
+        callback(__('pair.feedback.could_not_connect') + ' ' + err)
+      })
   })
 
   socket.on('disconnect', function () {
@@ -279,7 +285,7 @@ module.exports.searchMusic = function (deviceSearchParameters, queryProperty, se
             searchMethod = 'AudioLibrary.GetArtists'
             fuzzyLookupKey = 'artist'
             break
-          case 'ALBUM' :
+          case 'ALBUM':
             searchMethod = 'AudioLibrary.GetAlbums'
             break
         }
@@ -325,7 +331,7 @@ module.exports.searchMusic = function (deviceSearchParameters, queryProperty, se
                     case 'ARTIST':
                       reject(__('talkback.artist_not_found'))
                       break
-                    case 'ALBUM' :
+                    case 'ALBUM':
                       reject(__('talkback.album_not_found'))
                       break
                   }
@@ -335,7 +341,7 @@ module.exports.searchMusic = function (deviceSearchParameters, queryProperty, se
                 reject(__('talkback.no_music_in_library'))
               }
             }
-          )
+        )
       })
       .catch(reject)
   })
@@ -412,20 +418,20 @@ module.exports.nextOrPreviousTrack = function (deviceSearchParameters, previousO
       .then(function (kodi) {
         // Get the active player so we can next/previous it
         kodi.run('Player.GetActivePlayers', {})
-        .then(function (result) {
-          if (result[0]) { // Check whether there is an active player to stop
-            // Build request parameters and supply the player
-            var params = {
-              playerid: result[0].playerid,
-              to: previousOrNext
-            }
+          .then(function (result) {
+            if (result[0]) { // Check whether there is an active player to stop
+              // Build request parameters and supply the player
+              var params = {
+                playerid: result[0].playerid,
+                to: previousOrNext
+              }
 
-            kodi.run('Player.GoTo', params)
-              .then(function (result) {
-                resolve(previousOrNext)
-              })
-          }
-        })
+              kodi.run('Player.GoTo', params)
+                .then(function (result) {
+                  resolve(previousOrNext)
+                })
+            }
+          })
       })
   })
 }
@@ -760,20 +766,20 @@ function startListeningForEvents (device) {
     function reconnect () {
       console.log('Trying to reconnect')
       KodiWs(host, tcpport)
-      .then(function (connection) {
-        // Keep track of device id
-        connection.id = host
-        connection.tcpport = tcpport
-        connection.device_data = device.data
-        // Register the device
-        registeredDevices.push(connection)
-        // Start listening for Kodi events
-        startListeningForEvents(connection)
-      })
-      .catch(function (err) {
-        console.log('Stil cannot reconnect: ', err)
-        setTimeout(reconnect, 10000)
-      })
+        .then(function (connection) {
+          // Keep track of device id
+          connection.id = host
+          connection.tcpport = tcpport
+          connection.device_data = device.data
+          // Register the device
+          registeredDevices.push(connection)
+          // Start listening for Kodi events
+          startListeningForEvents(connection)
+        })
+        .catch(function (err) {
+          console.log('Stil cannot reconnect: ', err)
+          setTimeout(reconnect, 10000)
+        })
     }
 
     reconnect()
@@ -837,6 +843,10 @@ function onKodiStop (result, device) {
 
 function onKodiPlay (result, device) {
   console.log('onKodiPlay()')
+  // Throw a 'anything started playing' event
+  console.log('Triggering flow kodi_playing_something')
+  Homey.manager('flow').triggerDevice('kodi_playing_something', null, null, device.device_data)
+
   // Check if there's a new song/movie/episode playback or a resume action (player % > 1)
   // Build request parameters and supply the player
   var params = {
@@ -850,7 +860,7 @@ function onKodiPlay (result, device) {
         if (playerResult.percentage >= 0.1) {
           console.log('Triggering flow kodi_resume')
           Homey.manager('flow').triggerDevice('kodi_resume', null, null, device.device_data)
-          // Check the playback type (movie or episode)
+        // Check the playback type (movie or episode)
         } else if (result.data.item.type === 'movie' || result.data.item.type === 'movies') {
           // Check if we get a title from Kodi
           if (result.data.item.title) {
