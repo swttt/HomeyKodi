@@ -6,7 +6,23 @@
 <body>
 
 <h1 data-i18n="settings.title"></h1>
-<p data-i18n="settings.intro"></p>
+<h2 data-i18n="settings.application_settings"></h2>
+<fieldset id="app_settings">
+    <legend data-i18n="settings.application_settings"></legend>
+
+    <table id="app_settings">
+      <tr>
+        <td data-i18n="settings.days_since_new_movies_episode"></td>
+        <td><input type="text" id="settings_days_since"></input></td>
+      </tr>
+    </table>
+
+</fieldset>
+<button class="left" onclick="save()">Save changes</button>
+<br />
+<br />
+<h2 data-i18n="settings.loglegend"></h2>
+<p data-i18n="settings.log_intro"></p>
 <style>
 
   table#logs {
@@ -57,9 +73,25 @@
 
         }
       });
+
+      // Read app settings
+      Homey.get("days_since", function (err, value) {
+        if (value != null) {
+          $("#settings_days_since").val(value);
+        } else {
+          // default 7
+          $("#settings_days_since").val(7);
+        }
+      });
       
       // Ready
       Homey.ready();
+    }
+
+    function save () {
+      Homey.set('days_since', $("#settings_days_since").val() == null ? 7 : $("#settings_days_since").val(), function(err, username){
+        if( err ) return console.error('Could not set username', err);
+      });
     }
 </script>
 

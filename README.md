@@ -26,6 +26,8 @@ EN
 * "Shutdown / Hibernate / Reboot Kodi"
 * "I want to watch a movie"
 * "Start addon / program Exodus"
+* "Any new movies?"
+* "Any new episodes?"
 
 NL
 * "Start film / Speel film Finding Nemo"
@@ -40,6 +42,8 @@ NL
 * "Kodi afsluiten / herstarten"
 * "Ik wil een film kijken"
 * "Start addon / programma Exodus"
+* "Zijn er nieuwe films?"
+* "Zijn er nieuwe afleveringen?"
 
 ### Flow support
 *Triggers*
@@ -47,18 +51,20 @@ NL
 * On movie stop (when a movie ends, including credits)
 * On episode start
 * On episode stop (when an episode, including credits)
+* On playback start (anything starts playing)
 * On pause  
 * On resume 
 * On stop (when you press stop)
 * On reboot
 * On shutdown
 * On hibernate
-* On wake (experimental)
+* On wake
 
 *Actions*
 * Start a movie
 * Play / Pause
 * Play the latest episode of
+* Play music by artist
 * Stop
 * Reboot
 * Hibernate

@@ -12,6 +12,7 @@ function init () {
   Homey.manager('flow').on('action.hibernate_kodi', onFlowActionHibernate)
   Homey.manager('flow').on('action.reboot_kodi', onFlowActionReboot)
   Homey.manager('flow').on('action.shutdown_kodi', onFlowActionShutdown)
+  Homey.manager('flow').on('action.play_music_by_artist', onFlowActionPlayMusicByArtist)
 }
 module.exports.init = init
 
@@ -223,12 +224,44 @@ function parseSpeach (speech, callback) {
         return true // Only fire trigger
 
       case 'kodi_new_movies' :
+        // Get the setting for # of days to looks back
+        let daysSince = Homey.manager('settings').get('days_since')
+        // Use default value when no setting is found
+        daysSince == null ? 7 : daysSince
         // Try to look up any new movies
-        Homey.manager('drivers').getDriver('kodi').getNewestMovies(null, 7)
+        Homey.manager('drivers').getDriver('kodi').getNewestMovies(null, daysSince)
           .then(function (movies) {
-            Homey.manager('speech-output').say(__('talkback.found_following_movies'))
+            Homey.manager('speech-output').say(__('talkback.found_following_movies', { 'days_since': daysSince }))
             movies.forEach(function (movie) {
               Homey.manager('speech-output').say(movie.label)
+            })
+          })
+          .catch(
+            function (err) {
+              console.log('error', err)
+              // Driver should throw user friendly errors
+              Homey.manager('speech-output').say(err)
+            }
+          )
+
+        return true // Only fire trigger
+
+      case 'kodi_new_episodes' :
+        // Get the setting for # of days to looks back
+        let daysSinceEpisode = Homey.manager('settings').get('days_since')
+        // Use default value when no setting is found
+        daysSinceEpisode == null ? 7 : daysSinceEpisode
+        // Try to look up any new movies
+        Homey.manager('drivers').getDriver('kodi').getNewestEpisodes(null, daysSinceEpisode)
+          .then(function (episodes) {
+            Homey.manager('speech-output').say(__('talkback.found_following_episodes', { 'days_since': daysSinceEpisode }))
+            episodes.forEach(function (episode) {
+              Homey.manager('speech-output').say(__('talkback.found_episode', {
+                'showtitle': episode.showtitle,
+                'season': episode.season,
+                'episode': episode.episode,
+                'episode_title': episode.title
+              }))
             })
           })
           .catch(
@@ -298,6 +331,13 @@ function onFlowActionShutdown (callback, args) {
     .catch(function (error) { callback(error) })
 }
 
+function onFlowActionPlayMusicByArtist (callback, args) {
+  Homey.log('onFlowActionPlayMusicByArtist()', args)
+  searchAndPlayMusic(args.id, 'ARTIST', args.artist)
+    .then(function () { callback(null, true) })
+    .catch(function (error) { callback(error) })
+}
+
 /* ******************
 	COMMON FUNCTIONS
 ********************/
@@ -313,6 +353,7 @@ function searchAndPlayMovie (device, movieTitle) {
         // Play movie and trigger flows
         function (movie) {
           KodiDriver.playMovie(device, movie.movieid)
+          resolve()
         }
     )
     .catch(reject)
@@ -331,6 +372,7 @@ function searchAndStartAddon (device, addon) {
         // Start the addon
         function (addon) {
           KodiDriver.startAddon(device, addon.addonid)
+          resolve()
         }
     )
     .catch(reject)
@@ -347,6 +389,7 @@ function searchAndPlayMusic (device, queryProperty, searchQuery) {
       .then(
         function (songsToPlay) {
           KodiDriver.playMusic(device, songsToPlay, true)
+          resolve()
         }
       )
       .catch(reject)
@@ -362,6 +405,7 @@ function playLatestEpisode (device, seriesName) {
       .then(
         function (episodeToPlay) {
           KodiDriver.playEpisode(device, episodeToPlay)
+          resolve()
         }
       )
       .catch(reject)

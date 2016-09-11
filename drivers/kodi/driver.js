@@ -618,7 +618,9 @@ module.exports.startAddon = function (deviceSearchParameters, addonId) {
 module.exports.getNewestMovies = function (deviceSearchParameters, daysSince) {
   return new Promise(function (resolve, reject) {
     console.log('getNewestMovies()', deviceSearchParameters, daysSince)
-
+    // Calculate cutoff date to check for new movies
+    let dateSince = new Date()
+    dateSince.setDate(dateSince.getDate() - daysSince)
     // search Kodi instance by deviceSearchParameters
     getKodiInstance(deviceSearchParameters)
       .then(function (kodi) {
@@ -626,7 +628,7 @@ module.exports.getNewestMovies = function (deviceSearchParameters, daysSince) {
           filter: {
             operator: 'greaterthan',
             field: 'dateadded',
-            value: '2016-04-31' // TODO > Setting
+            value: dateSince.toISOString().substring(0, 10)
           }
         }
 
@@ -639,6 +641,43 @@ module.exports.getNewestMovies = function (deviceSearchParameters, daysSince) {
             } else {
               // No movies in media libary, throw an error
               reject(__('talkback.no_new_movies_in_library'))
+            }
+          })
+      })
+      .catch(reject)
+  })
+}
+
+/* **********************************
+  GET LATEST EPISODES
+************************************/
+module.exports.getNewestEpisodes = function (deviceSearchParameters, daysSince) {
+  return new Promise(function (resolve, reject) {
+    console.log('getNewestEpisodes()', deviceSearchParameters, daysSince)
+    // Calculate cutoff date to check for new Episodes
+    let dateSince = new Date()
+    dateSince.setDate(dateSince.getDate() - daysSince)
+    // search Kodi instance by deviceSearchParameters
+    getKodiInstance(deviceSearchParameters)
+      .then(function (kodi) {
+        let params = {
+          filter: {
+            operator: 'greaterthan',
+            field: 'dateadded',
+            value: dateSince.toISOString().substring(0, 10)
+          },
+          properties: ['playcount', 'showtitle', 'season', 'episode', 'title']
+        }
+
+        // Kodi API: VideoLibrary.GetEpisodes
+        kodi.run('VideoLibrary.GetEpisodes', params)
+          .then(function (result) {
+            console.log(result)
+            if (result.episodes) { // Check if there are episodes in the media library
+              resolve(result.episodes)
+            } else {
+              // No new episodes in media libary, throw an error
+              reject(__('talkback.no_new_episodes_in_library'))
             }
           })
       })

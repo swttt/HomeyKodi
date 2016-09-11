@@ -13,7 +13,10 @@
 		"no_addons_installed": "Er zijn geen addons geinstalleerd",
 		"addon_not_found": "Ik kon de addon niet vinden.",
 		"no_new_movies_in_library": "Nee, er zijn geen nieuwe films in je bibliotheek",
-		"found_following_movies": "De volgende films zijn nieuw in je bibliotheek",
+		"found_following_movies": "De volgende films zijn aan je bibliotheek toegevoegd in de afgelopen __days_since__ dagen",
+		"no_new_episodes_in_library": "Nee, er zijn geen nieuwe afleveringen in je bibliotheek",		
+		"found_following_episodes": "De volgende afleveringen zijn aan je bibliotheek toegevoegd in de afgelopen __days_since__ dagen",
+		"found_episode": "__showtitle__, Seizoen __season__ aflvering __episode__. __episode_title__",
     "something_went_wrong": "Oeps! Er ging iets fout"
 	}
 	,
@@ -57,7 +60,9 @@
 	 },
 	 "settings":{
 		 "title": "Kodi instellingen",
+		 "application_settings":"Applicatie instellingen",
+		 "days_since_new_movies_episode": "Aantal dagen dat Kodi teruggaat om te zoeken voor nieuwe films / afleveringen",
 		 "loglegend":"Logs",		 
-		 "intro": "Deze pagina toont de laatste 50 log entries van de Kodi app. Als je problemen hebt met de app kan deze informatie je verder helpen."
+		 "log_intro": "Deze pagina toont de laatste 50 log entries van de Kodi app. Als je problemen hebt met de app kan deze informatie je verder helpen."
 	 }
 }

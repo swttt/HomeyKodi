@@ -13,7 +13,10 @@
 		"no_addons_installed": "There are no installed addons",
 		"addon_not_found": "I couldn't find the addon.",
 		"no_new_movies_in_library": "Nope, there are no new movies in your library",		
-		"found_following_movies": "I found the following new movies in your library",
+		"found_following_movies": "The following movies have been added to your library in the past __days_since__ days",
+		"no_new_episodes_in_library": "Nope, there are no new episodes in your library",		
+		"found_following_episodes": "The following episodes have been added to your library in the past __days_since__ days",
+		"found_episode": "__showtitle__, Season __season__ episode __episode__. __episode_title__",
     "something_went_wrong": "Oops! Something went wrong"
 	}
 	,
@@ -57,7 +60,9 @@
 	 },
 	 "settings":{
 		 "title": "Kodi settings",
+		 "application_settings":"Application settings",
+		 "days_since_new_movies_episode": "Number of days Kodi looks back for new movies / episode when asked about new movies",
 		 "loglegend":"Logs",
-		 "intro": "This page shows the last 50 log items logged by the Kodi app. If you have any issues with the app, this logging information will provide you some guidance to help you solve the problem."
+		 "log_intro": "This page shows the last 50 log items logged by the Kodi app. If you have any issues with the app, this logging information will provide you some guidance to help you solve the problem."
 	 }
 }
