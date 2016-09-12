@@ -1,5 +1,7 @@
 'use strict'
 
+var Utils = require('../../libs/utils')
+
 function init () {
   Homey.log('init()')
 
@@ -226,8 +228,10 @@ function parseSpeach (speech, callback) {
       case 'kodi_new_movies' :
         // Get the setting for # of days to looks back
         let daysSince = Homey.manager('settings').get('days_since')
-        // Use default value when no setting is found
-        daysSince == null ? 7 : daysSince
+        // Use default value when no proper setting is found
+        if (!Utils.isNumeric(daysSince)) {
+          daysSince = 7
+        }
         // Try to look up any new movies
         Homey.manager('drivers').getDriver('kodi').getNewestMovies(null, daysSince)
           .then(function (movies) {
@@ -249,8 +253,10 @@ function parseSpeach (speech, callback) {
       case 'kodi_new_episodes' :
         // Get the setting for # of days to looks back
         let daysSinceEpisode = Homey.manager('settings').get('days_since')
-        // Use default value when no setting is found
-        daysSinceEpisode == null ? 7 : daysSinceEpisode
+        // Use default value when no proper setting is found
+        if (!Utils.isNumeric(daysSinceEpisode)) {
+          daysSinceEpisode = 7
+        }
         // Try to look up any new movies
         Homey.manager('drivers').getDriver('kodi').getNewestEpisodes(null, daysSinceEpisode)
           .then(function (episodes) {

@@ -17,3 +17,7 @@ exports.shuffle = function (array) {
 
   return array
 }
+
+exports.isNumeric = function (n) {
+  return !isNaN(parseFloat(n)) && isFinite(n)
+}
