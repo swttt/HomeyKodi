@@ -15,6 +15,8 @@ function init () {
   Homey.manager('flow').on('action.reboot_kodi', onFlowActionReboot)
   Homey.manager('flow').on('action.shutdown_kodi', onFlowActionShutdown)
   Homey.manager('flow').on('action.play_music_by_artist', onFlowActionPlayMusicByArtist)
+  Homey.manager('flow').on('action.mute_kodi', onFlowActionMuteKodi)
+  Homey.manager('flow').on('action.unmute_kodi', onFlowActionUnmuteKodi)
 }
 module.exports.init = init
 
@@ -340,6 +342,20 @@ function onFlowActionShutdown (callback, args) {
 function onFlowActionPlayMusicByArtist (callback, args) {
   Homey.log('onFlowActionPlayMusicByArtist()', args)
   searchAndPlayMusic(args.id, 'ARTIST', args.artist)
+    .then(function () { callback(null, true) })
+    .catch(function (error) { callback(error) })
+}
+
+function onFlowActionMuteKodi (callback, args) {
+  Homey.log('onFlowActionMuteKodi()', args)
+  Homey.manager('drivers').getDriver('kodi').muteKodi(args.id)
+    .then(function () { callback(null, true) })
+    .catch(function (error) { callback(error) })
+}
+
+function onFlowActionUnmuteKodi (callback, args) {
+  Homey.log('onFlowActionMuteKodi()', args)
+  Homey.manager('drivers').getDriver('kodi').unmuteKodi(args.id)
     .then(function () { callback(null, true) })
     .catch(function (error) { callback(error) })
 }

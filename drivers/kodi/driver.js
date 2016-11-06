@@ -735,6 +735,38 @@ module.exports.hibernateKodi = function (deviceSearchParameters) {
       .catch(reject)
   })
 }
+
+module.exports.muteKodi = function (deviceSearchParameters) {
+  // Kodi API: System.Hibernate
+  return new Promise(function (resolve, reject) {
+    console.log('muteKodi()', deviceSearchParameters)
+    // search Kodi instance by searchParameters
+    getKodiInstance(deviceSearchParameters)
+      .then(function (kodi) {
+        kodi.run('Application.SetMute', true)
+          .then(function (result) {
+            resolve(kodi)
+          })
+      })
+      .catch(reject)
+  })
+}
+
+module.exports.unmuteKodi = function (deviceSearchParameters) {
+  // Kodi API: System.Hibernate
+  return new Promise(function (resolve, reject) {
+    console.log('muteKodi()', deviceSearchParameters)
+    // search Kodi instance by searchParameters
+    getKodiInstance(deviceSearchParameters)
+      .then(function (kodi) {
+        kodi.run('Application.SetMute', false)
+          .then(function (result) {
+            resolve(kodi)
+          })
+      })
+      .catch(reject)
+  })
+}
 /* **********************************
   GENERIC FUNCTIONS
 ************************************/
@@ -830,6 +862,8 @@ function onKodiGenericEvent (result, device, triggerName) {
 
 function onKodiStop (result, device) {
   console.log('onKodiStop')
+  console.log('Triggering flow ', 'kodi_stop')
+  Homey.manager('flow').triggerDevice('kodi_stop', null, null, device.device_data)
   // Check if the user stopped a movie/episode halfway or whether the episode/movie actually ended
   if (result.data.end === true) {
     if (result.data.item.type === 'episode' || result.data.item.type === 'episodes') {
@@ -868,10 +902,6 @@ function onKodiStop (result, device) {
           }, null, device.device_data)
         })
     }
-  } else {
-    // User stopped, trigger normal stop event
-    console.log('Triggering flow ', 'kodi_stop')
-    Homey.manager('flow').triggerDevice('kodi_stop', null, null, device.device_data)
   }
 }
 
