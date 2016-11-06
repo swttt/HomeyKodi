@@ -69,6 +69,8 @@ NL
 * Reboot
 * Hibernate
 * Shutdown
+* Mute
+* Unmute
 
 Flows are now triggered whenever something happens on Kodi, whether this has been triggered by Homey or any other remote control.
 
