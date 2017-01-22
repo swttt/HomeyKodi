@@ -767,6 +767,29 @@ module.exports.unmuteKodi = function (deviceSearchParameters) {
       .catch(reject)
   })
 }
+
+module.exports.setSubtitle = function (deviceSearchParameters, subsitleOnOff) {
+  // Kodi API: System.Hibernate
+  return new Promise(function (resolve, reject) {
+    console.log('setSubtitle(' + subsitleOnOff + ')', deviceSearchParameters)
+    // search Kodi instance by searchParameters
+    getKodiInstance(deviceSearchParameters)
+      .then(function (kodi) {
+        let params = {
+           playerid: 1
+          ,subtitle: subsitleOnOff
+        }
+
+        kodi.run('Player.SetSubtitle', params)
+          .then(function (result) {
+            console.log(result)
+            resolve(kodi)
+          })
+      })
+      .catch(reject)
+  })
+}
+
 /* **********************************
   GENERIC FUNCTIONS
 ************************************/

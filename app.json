@@ -8,7 +8,7 @@
     "en": "Control your Kodi device with Homey!",    
     "nl": "Bestuur je Kodi apparaat met Homey!"
   },
-  "version": "1.6.0",
+  "version": "1.7.0",
   "compatibility": ">=0.9 || 1.x",
   "category": [
     "music",
@@ -670,6 +670,36 @@
         "title": {
           "en" : "Unmute Kodi",
           "nl" : "Zet Kodi op luid (unmute)"
+        },
+        "fluidArgs": true,
+        "args":[
+          {
+            "name": "kodi",
+            "type": "device",
+            "filter": "driver_uri=homey:app:nl.marvinschenkel.kodi&driver_id=kodi"
+          }
+        ]
+      },
+      {
+        "id": "subtitle_on",
+        "title": {
+          "en" : "Turn subtitle on",
+          "nl" : "Zet ondertiteling aan"
+        },
+        "fluidArgs": true,
+        "args":[
+          {
+            "name": "kodi",
+            "type": "device",
+            "filter": "driver_uri=homey:app:nl.marvinschenkel.kodi&driver_id=kodi"
+          }
+        ]
+      },
+      {
+        "id": "subtitle_off",
+        "title": {
+          "en" : "Turn subtitle off",
+          "nl" : "Zet ondertiteling uit"
         },
         "fluidArgs": true,
         "args":[

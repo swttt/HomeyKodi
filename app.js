@@ -17,6 +17,8 @@ function init () {
   Homey.manager('flow').on('action.play_music_by_artist', onFlowActionPlayMusicByArtist)
   Homey.manager('flow').on('action.mute_kodi', onFlowActionMuteKodi)
   Homey.manager('flow').on('action.unmute_kodi', onFlowActionUnmuteKodi)
+  Homey.manager('flow').on('action.subtitle_on', onFlowActionSubtitleOn)
+  Homey.manager('flow').on('action.subtitle_off', onFlowActionSubtitleOff)
 }
 module.exports.init = init
 
@@ -37,7 +39,7 @@ function parseSpeach (speech, callback) {
         searchAndPlayMovie(null, movieTitle).catch(
           function (err) {
             // Driver should throw user friendly errors
-            Homey.manager('speech-output').say(err)
+            speech.say(err)
           }
         )
 
@@ -45,7 +47,7 @@ function parseSpeach (speech, callback) {
         return true
 
       case 'kodi_play_tvshow' :
-        Homey.manager('speech-output').say(__('talkback.not_implemented'))
+        speech.say(__('talkback.not_implemented'))
         // Only fire 1 trigger
         return true
 
@@ -59,7 +61,7 @@ function parseSpeach (speech, callback) {
             .catch(
               function (err) {
                 // Driver should throw user friendly errors
-                Homey.manager('speech-output').say(err)
+                speech.say(err)
               }
           )
         } else if (1 === 0) {
@@ -73,7 +75,7 @@ function parseSpeach (speech, callback) {
           .catch(
             function (err) {
               // Driver should throw user friendly errors
-              Homey.manager('speech-output').say(err)
+              speech.say(err)
             }
         )
         return true // Only fire one trigger
@@ -83,7 +85,7 @@ function parseSpeach (speech, callback) {
         .catch(
           function (err) {
             // Driver should throw user friendly errors
-            Homey.manager('speech-output').say(err)
+            speech.say(err)
           }
         )
         return true // Only fire one trigger
@@ -93,7 +95,7 @@ function parseSpeach (speech, callback) {
         .catch(
           function (err) {
             // Driver should throw user friendly errors
-            Homey.manager('speech-output').say(err)
+            speech.say(err)
           }
         )
         return true // Only fire one trigger
@@ -103,7 +105,7 @@ function parseSpeach (speech, callback) {
         .catch(
           function (err) {
             // Driver should throw user friendly errors
-            Homey.manager('speech-output').say(err)
+            speech.say(err)
           }
         )
         return true // Only fire one trigger
@@ -115,18 +117,18 @@ function parseSpeach (speech, callback) {
         .catch(
           function (err) {
             // Driver should throw user friendly errors
-            Homey.manager('speech-output').say(err)
+            speech.say(err)
             // 1 Retry
-            Homey.manager('speech-input').ask(__('question.latest_episode_retry'), function (err, result) {
+            speech(__('question.latest_episode_retry'), function (err, result) {
               if (err) {
-                Homey.manager('speech-output').say(__('talkback.something_went_wrong') + ' ' + err)
+                speech.say(__('talkback.something_went_wrong') + ' ' + err)
               } else {
                 console.log('result:', result)
                 playLatestEpisode(null, result)
                 .catch(
                   function (err) {
                     // Driver should throw user friendly errors
-                    Homey.manager('speech-output').say(err)
+                    speech.say(err)
                   }
                 )
               }
@@ -136,16 +138,16 @@ function parseSpeach (speech, callback) {
         return true // Only fire one trigger
 
       case 'kodi_watch_movie' :
-        Homey.manager('speech-input').ask(__('question.what_movie'), function (err, result) {
+        speech(__('question.what_movie'), function (err, result) {
           if (err) {
-            Homey.manager('speech-output').say(__('talkback.something_went_wrong') + ' ' + err)
+            speech.say(__('talkback.something_went_wrong') + ' ' + err)
           } else {
             // Try to lookup the movie (result = movietitle)
             // NOTE:	no multiple device support yet, pass null as device so 1st registered device gets picked
             searchAndPlayMovie(null, result).catch(
               function (err) {
                 // Driver should throw user friendly errors
-                Homey.manager('speech-output').say(err)
+                speech.say(err)
               }
             )
           }
@@ -156,14 +158,14 @@ function parseSpeach (speech, callback) {
         // Confirm whether to hibernate
         Homey.manager('speech-input').confirm(__('question.confirm_hibernate'), function (err, confirmed) {
           if (err) {
-            Homey.manager('speech-output').say(__('talkback.something_went_wrong') + ' ' + err)
+            speech.say(__('talkback.something_went_wrong') + ' ' + err)
           } else if (confirmed) {
             // Hibernate Kodi
             Homey.manager('drivers').getDriver('kodi').hibernateKodi(null)
             .catch(
               function (err) {
                 // Driver should throw user friendly errors
-                Homey.manager('speech-output').say(err)
+                speech.say(err)
               }
             )
           } else {
@@ -176,14 +178,14 @@ function parseSpeach (speech, callback) {
         // Confirm whether to reboot
         Homey.manager('speech-input').confirm(__('question.confirm_reboot'), function (err, confirmed) {
           if (err) {
-            Homey.manager('speech-output').say(__('talkback.something_went_wrong') + ' ' + err)
+            speech.say(__('talkback.something_went_wrong') + ' ' + err)
           } else if (confirmed) {
             // Reboot Kodi
             Homey.manager('drivers').getDriver('kodi').rebootKodi(null)
             .catch(
               function (err) {
                 // Driver should throw user friendly errors
-                Homey.manager('speech-output').say(err)
+                speech.say(err)
               }
             )
           } else {
@@ -196,14 +198,14 @@ function parseSpeach (speech, callback) {
         // Confirm whether to reboot
         Homey.manager('speech-input').confirm(__('question.confirm_shutdown'), function (err, confirmed) {
           if (err) {
-            Homey.manager('speech-output').say(__('talkback.something_went_wrong') + ' ' + err)
+            speech.say(__('talkback.something_went_wrong') + ' ' + err)
           } else if (confirmed) {
             // Reboot Kodi
             Homey.manager('drivers').getDriver('kodi').shutdownKodi(null)
             .catch(
               function (err) {
                 // Driver should throw user friendly errors
-                Homey.manager('speech-output').say(err)
+                speech.say(err)
               }
             )
           } else {
@@ -221,7 +223,7 @@ function parseSpeach (speech, callback) {
         searchAndStartAddon(null, addon).catch(
           function (err) {
             // Driver should throw user friendly errors
-            Homey.manager('speech-output').say(err)
+            speech.say(err)
           }
         )
 
@@ -237,16 +239,16 @@ function parseSpeach (speech, callback) {
         // Try to look up any new movies
         Homey.manager('drivers').getDriver('kodi').getNewestMovies(null, daysSince)
           .then(function (movies) {
-            Homey.manager('speech-output').say(__('talkback.found_following_movies', { 'days_since': daysSince }))
+            speech.say(__('talkback.found_following_movies', { 'days_since': daysSince }))
             movies.forEach(function (movie) {
-              Homey.manager('speech-output').say(movie.label)
+              speech.say(movie.label)
             })
           })
           .catch(
             function (err) {
               console.log('error', err)
               // Driver should throw user friendly errors
-              Homey.manager('speech-output').say(err)
+              speech.say(err)
             }
           )
 
@@ -262,9 +264,9 @@ function parseSpeach (speech, callback) {
         // Try to look up any new movies
         Homey.manager('drivers').getDriver('kodi').getNewestEpisodes(null, daysSinceEpisode)
           .then(function (episodes) {
-            Homey.manager('speech-output').say(__('talkback.found_following_episodes', { 'days_since': daysSinceEpisode }))
+            speech.say(__('talkback.found_following_episodes', { 'days_since': daysSinceEpisode }))
             episodes.forEach(function (episode) {
-              Homey.manager('speech-output').say(__('talkback.found_episode', {
+              speech.say(__('talkback.found_episode', {
                 'showtitle': episode.showtitle,
                 'season': episode.season,
                 'episode': episode.episode,
@@ -276,7 +278,7 @@ function parseSpeach (speech, callback) {
             function (err) {
               console.log('error', err)
               // Driver should throw user friendly errors
-              Homey.manager('speech-output').say(err)
+              speech.say(err)
             }
           )
 
@@ -356,6 +358,20 @@ function onFlowActionMuteKodi (callback, args) {
 function onFlowActionUnmuteKodi (callback, args) {
   Homey.log('onFlowActionMuteKodi()', args)
   Homey.manager('drivers').getDriver('kodi').unmuteKodi(args.id)
+    .then(function () { callback(null, true) })
+    .catch(function (error) { callback(error) })
+}
+
+function onFlowActionSubtitleOn (callback, args) {
+  Homey.log('onFlowActionSubtitleOn()', args)
+  Homey.manager('drivers').getDriver('kodi').setSubtitle(args.id, 'on')
+    .then(function () { callback(null, true) })
+    .catch(function (error) { callback(error) })
+}
+
+function onFlowActionSubtitleOff (callback, args) {
+  Homey.log('onFlowActionSubtitleOff()', args)
+  Homey.manager('drivers').getDriver('kodi').setSubtitle(args.id, 'off')
     .then(function () { callback(null, true) })
     .catch(function (error) { callback(error) })
 }
