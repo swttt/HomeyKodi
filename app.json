@@ -273,6 +273,48 @@
         ]
       },
       {
+        "id":"kodi_song_start",
+        "title": {
+          "en":"A song starts playing",          
+          "nl":"Er wordt muziek afgespeeld"
+        },
+        "args": [
+          {
+            "name": "kodi",
+            "type": "device",
+            "filter": "driver_uri=homey:app:nl.marvinschenkel.kodi&driver_id=kodi",
+            "placeholder": { 
+              "en": "Which Kodi device", 
+              "nl": "Welk Kodi apparaat" 
+             }
+          }
+        ],
+        "tokens":[
+          {
+            "name":"artist",
+            "title": {
+              "en":"Artist",
+              "nl":"Artiest"
+            },
+            "example":{
+              "en":"Gareth Emery",
+              "nl":"Gareth Emery"
+            }
+          },
+          {
+            "name":"song_title",
+            "title": {
+              "en":"Title",
+              "nl":"Titel"
+            },
+            "example":{
+              "en":"Soldier",
+              "nl":"Soldier"
+            }
+          }
+        ]
+      },
+      {
         "id":"kodi_episode_start",
         "title": {
           "en":"An episode has started",
@@ -397,6 +439,20 @@
         "title": {
           "en":"Kodi starts playing something",
           "nl": "Kodi start met iets afspelen"
+        },
+        "args": [
+          {
+            "name": "kodi",
+            "type": "device",
+            "filter": "driver_uri=homey:app:nl.marvinschenkel.kodi&driver_id=kodi"
+          }
+        ]
+      },
+      {
+        "id":"kodi_reconnects",
+        "title": {
+          "en":"Homey reconnects to Kodi",
+          "nl": "Homey (her) verbindt met Kodi"
         },
         "args": [
           {
@@ -670,6 +726,21 @@
         "title": {
           "en" : "Unmute Kodi",
           "nl" : "Zet Kodi op luid (unmute)"
+        },
+        "fluidArgs": true,
+        "args":[
+          {
+            "name": "kodi",
+            "type": "device",
+            "filter": "driver_uri=homey:app:nl.marvinschenkel.kodi&driver_id=kodi"
+          }
+        ]
+      },
+      {
+        "id": "party_mode_kodi",
+        "title": {
+          "en" : "Set music party mode on",
+          "nl" : "Zet party modus aan"
         },
         "fluidArgs": true,
         "args":[

@@ -59,6 +59,8 @@ NL
 * On shutdown
 * On hibernate
 * On wake
+* On Homey reconnect to Homey
+* On song start
 
 *Actions*
 * Start a movie
@@ -71,6 +73,9 @@ NL
 * Shutdown
 * Mute
 * Unmute
+* Subtitle on
+* Subtitle off
+* Set party mode on
 
 Flows are now triggered whenever something happens on Kodi, whether this has been triggered by Homey or any other remote control.
 

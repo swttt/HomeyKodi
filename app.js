@@ -19,6 +19,7 @@ function init () {
   Homey.manager('flow').on('action.unmute_kodi', onFlowActionUnmuteKodi)
   Homey.manager('flow').on('action.subtitle_on', onFlowActionSubtitleOn)
   Homey.manager('flow').on('action.subtitle_off', onFlowActionSubtitleOff)
+  Homey.manager('flow').on('action.party_mode_kodi', onFlowActionSetPartyMode)
 }
 module.exports.init = init
 
@@ -372,6 +373,13 @@ function onFlowActionSubtitleOn (callback, args) {
 function onFlowActionSubtitleOff (callback, args) {
   Homey.log('onFlowActionSubtitleOff()', args)
   Homey.manager('drivers').getDriver('kodi').setSubtitle(args.id, 'off')
+    .then(function () { callback(null, true) })
+    .catch(function (error) { callback(error) })
+}
+
+function onFlowActionSetPartyMode (callback, args) {
+  Homey.log('onFlowActionSetPartyMode()', args)
+  Homey.manager('drivers').getDriver('kodi').setPartyMode(args.id, args.onoff)
     .then(function () { callback(null, true) })
     .catch(function (error) { callback(error) })
 }

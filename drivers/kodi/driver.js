@@ -8,6 +8,9 @@ var Utils = require('../../libs/utils')
 // Keep track of registered devices
 var registeredDevices = []
 
+// Globals
+var CONNECT_INTERVAL = 10000 //miliseconds
+
 // Init the logging
 console.log = function () {
   // Save log message to settings
@@ -53,7 +56,7 @@ module.exports.init = function (devices, callback) {
           })
           .catch(function (err) {
             console.log('Stil cannot reconnect: ', err)
-            setTimeout(reconnect, 10000)
+            setTimeout(reconnect, CONNECT_INTERVAL)
           })
       }
 
@@ -574,7 +577,6 @@ module.exports.searchAddon = function (deviceSearchParameters, addonName) {
               } else {
                 reject(__('talkback.addon_not_found'))
               }
-              console.log(addonNameResult)
             } else {
               // No TV Shows in the library
               reject(__('talkback.no_addons_installed'))
@@ -601,7 +603,6 @@ module.exports.startAddon = function (deviceSearchParameters, addonId) {
 
         kodi.run('Addons.ExecuteAddon', param)
           .then(function (result) {
-            console.log('result', result)
             resolve(kodi)
           })
           .catch(function (err) {
@@ -635,7 +636,6 @@ module.exports.getNewestMovies = function (deviceSearchParameters, daysSince) {
         // Kodi API: VideoLibrary.GetMovies
         kodi.run('VideoLibrary.GetMovies', params)
           .then(function (result) {
-            console.log(result)
             if (result.movies) { // Check if there are movies in the media library
               resolve(result.movies)
             } else {
@@ -672,7 +672,6 @@ module.exports.getNewestEpisodes = function (deviceSearchParameters, daysSince) 
         // Kodi API: VideoLibrary.GetEpisodes
         kodi.run('VideoLibrary.GetEpisodes', params)
           .then(function (result) {
-            console.log(result)
             if (result.episodes) { // Check if there are episodes in the media library
               resolve(result.episodes)
             } else {
@@ -685,6 +684,30 @@ module.exports.getNewestEpisodes = function (deviceSearchParameters, daysSince) 
   })
 }
 
+/* **********************************
+  SET PARTY MODE
+************************************/
+module.exports.setPartyMode = function(deviceSearchParameters, onOff) {
+  // Kodi API: System.Hibernate
+  return new Promise(function (resolve, reject) {
+    console.log('setPartyMode(' + onOff + ')', deviceSearchParameters)
+    // search Kodi instance by searchParameters
+    getKodiInstance(deviceSearchParameters)
+      .then(function (kodi) {
+        let params = {
+          item: {
+            'partymode': 'music'          
+          }
+        }
+
+        kodi.run('Player.Open', params)
+          .then(function (result) {
+            resolve(kodi)
+          }).catch(function(err){console.log(err)})
+      })
+      .catch(reject)
+  })
+}
 /* **********************************
   SYSTEM FUNCTIONS
 ************************************/
@@ -775,15 +798,20 @@ module.exports.setSubtitle = function (deviceSearchParameters, subsitleOnOff) {
     // search Kodi instance by searchParameters
     getKodiInstance(deviceSearchParameters)
       .then(function (kodi) {
-        let params = {
-           playerid: 1
-          ,subtitle: subsitleOnOff
-        }
-
-        kodi.run('Player.SetSubtitle', params)
+        // Get the active player so we can set the subtitle
+        kodi.run('Player.GetActivePlayers', {})
           .then(function (result) {
-            console.log(result)
-            resolve(kodi)
+            if (result[0]) { // Check whether there is an active player to set the subtitle
+              // Build request parameters and supply the player
+              let params = {
+                 playerid: result[0].playerid
+                ,subtitle: subsitleOnOff
+              }
+              kodi.run('Player.SetSubtitle', params)
+              .then(function (result) {
+                resolve(kodi)
+              })
+            }
           })
       })
       .catch(reject)
@@ -840,6 +868,11 @@ function startListeningForEvents (device) {
   // Catch error when Kodi suddenly goes offline to prevent the app from crashing
   device.on('error', function (error) {
     console.log('Kodi connection error: ', error)
+
+    // Delete the device details from Homey
+    deleteDevice(device.id)
+    // Initiate auto reconnect process
+    pollReconnect(device)
   })
 
   // Keep track of connection loss
@@ -850,34 +883,40 @@ function startListeningForEvents (device) {
     let tcpport = device.tcpport
     // Delete the device details from Homey
     deleteDevice(device.id)
-
-    // Try to reconnect every 10sec
-    function reconnect () {
-      console.log('Trying to reconnect')
-      KodiWs(host, tcpport)
-        .then(function (connection) {
-          // Keep track of device id
-          connection.id = host
-          connection.tcpport = tcpport
-          connection.device_data = device.data
-          // Register the device
-          registeredDevices.push(connection)
-          // Start listening for Kodi events
-          startListeningForEvents(connection)
-        })
-        .catch(function (err) {
-          console.log('Stil cannot reconnect: ', err)
-          setTimeout(reconnect, 10000)
-        })
-    }
-
-    reconnect()
+    // Initiate auto reconnect process
+    pollReconnect(device)
   })
+}
+
+// Try to reconnect every 10sec
+function pollReconnect(device){
+  function reconnect () {
+    console.log('Trying to reconnect')
+    KodiWs(device.id, device.tcpport)
+      .then(function (connection) {
+        // Keep track of device id
+        connection.id = device.id
+        connection.tcpport = device.tcpport
+        connection.device_data = device.data
+        // Register the device
+        registeredDevices.push(connection)
+        // Start listening for Kodi events
+        startListeningForEvents(connection)
+        console.log('Triggering kodi_reconnect')
+        // Trigger kodi reconnect flow
+        Homey.manager('flow').triggerDevice('kodi_reconnects', null, null, device.data)
+      })
+      .catch(function (err) {
+        console.log('Stil cannot reconnect: ', err)
+        setTimeout(reconnect, CONNECT_INTERVAL)
+      })
+  }
+
+  reconnect()
 }
 
 function onKodiGenericEvent (result, device, triggerName) {
   console.log('onKodiGenericEvent() ', triggerName)
-  console.log(result)
   // Trigger the flow
   console.log('Triggering flow ', triggerName)
   Homey.manager('flow').triggerDevice(triggerName, null, null, device.device_data)
@@ -942,9 +981,9 @@ function onKodiPlay (result, device) {
   }
   device.run('Player.GetProperties', params)
     .then(function (playerResult) {
-      // If the percentage is above 0.1, we have a resume-action
+      // If the percentage is above 0.1 for eps/movies or above 1  for songs , we have a resume-action
       if (playerResult) {
-        if (playerResult.percentage >= 0.1) {
+        if ((playerResult.percentage >= 0.1 && result.data.item.type != 'song') || (playerResult.percentage >= 1 && result.data.item.type === 'song')) {
           console.log('Triggering flow kodi_resume')
           Homey.manager('flow').triggerDevice('kodi_resume', null, null, device.device_data)
         // Check the playback type (movie or episode)
@@ -975,7 +1014,7 @@ function onKodiPlay (result, device) {
           }
         } else if (result.data.item.type === 'episode' || result.data.item.type === 'episodes') {
           // Get Episode details
-          var episodeParams = {
+          let episodeParams = {
             episodeid: result.data.item.id,
             properties: ['showtitle', 'season', 'episode', 'title']
           }
@@ -990,6 +1029,22 @@ function onKodiPlay (result, device) {
                 episode: episodeResult.episodedetails.episode
               }, null, device.device_data)
             })
+        } else if (result.data.item.type === 'song' || result.data.item.type === 'songs') {
+          // Get song details
+          let songParams = {
+            songid: result.data.item.id,
+            properties: ['artist','title']
+          }
+          device.run('AudioLibrary.GetSongDetails', songParams)
+            .then(function (songResult) {
+              // Trigger action kodi_song_start
+              Homey.log('Triggering flow kodi_song_start, artist: ', songResult.songdetails.artist[0], 'title: ', songResult.songdetails.title)
+              Homey.manager('flow').triggerDevice('kodi_song_start', {
+                artist: songResult.songdetails.artist[0],
+                song_title: songResult.songdetails.title
+              }, null, device.device_data)
+            }).catch(function(err){console.log(err)})
+          
         }
       }
     })
