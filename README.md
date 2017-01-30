@@ -76,6 +76,7 @@ NL
 * Subtitle on
 * Subtitle off
 * Set party mode on
+* Set Volume
 
 Flows are now triggered whenever something happens on Kodi, whether this has been triggered by Homey or any other remote control.
 
