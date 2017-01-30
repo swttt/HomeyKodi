@@ -818,6 +818,24 @@ module.exports.setSubtitle = function (deviceSearchParameters, subsitleOnOff) {
   })
 }
 
+module.exports.setVolume = function (deviceSearchParameters, volume) {
+  // Kodi API: System.Hibernate
+  return new Promise(function (resolve, reject) {
+    console.log('setVolume(' + volume + ')', deviceSearchParameters)
+    // search Kodi instance by searchParameters
+    getKodiInstance(deviceSearchParameters)
+      .then(function (kodi) {
+        let params = {
+          volume: volume
+        }
+        kodi.run('Application.SetVolume', params)
+          .then(function (result) {
+            resolve(kodi)
+          })
+      })
+      .catch(reject)
+  })
+}
 /* **********************************
   GENERIC FUNCTIONS
 ************************************/

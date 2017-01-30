@@ -20,6 +20,7 @@ function init () {
   Homey.manager('flow').on('action.subtitle_on', onFlowActionSubtitleOn)
   Homey.manager('flow').on('action.subtitle_off', onFlowActionSubtitleOff)
   Homey.manager('flow').on('action.party_mode_kodi', onFlowActionSetPartyMode)
+  Homey.manager('flow').on('action.set_volume', onFlowActionSetVolume)
 }
 module.exports.init = init
 
@@ -384,6 +385,12 @@ function onFlowActionSetPartyMode (callback, args) {
     .catch(function (error) { callback(error) })
 }
 
+function onFlowActionSetVolume (callback, args) {
+  Homey.log('onFlowActionSetVolume()', args)
+  Homey.manager('drivers').getDriver('kodi').setVolume(args.id, args.volume)
+    .then(function () { callback(null, true) })
+    .catch(function (error) { callback(error) })
+}
 /* ******************
 	COMMON FUNCTIONS
 ********************/
