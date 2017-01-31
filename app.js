@@ -121,7 +121,7 @@ function parseSpeach (speech, callback) {
             // Driver should throw user friendly errors
             speech.say(err)
             // 1 Retry
-            speech(__('question.latest_episode_retry'), function (err, result) {
+            speech.ask(__('question.latest_episode_retry'), function (err, result) {
               if (err) {
                 speech.say(__('talkback.something_went_wrong') + ' ' + err)
               } else {
@@ -140,7 +140,7 @@ function parseSpeach (speech, callback) {
         return true // Only fire one trigger
 
       case 'kodi_watch_movie' :
-        speech(__('question.what_movie'), function (err, result) {
+        speech.ask(__('question.what_movie'), function (err, result) {
           if (err) {
             speech.say(__('talkback.something_went_wrong') + ' ' + err)
           } else {
