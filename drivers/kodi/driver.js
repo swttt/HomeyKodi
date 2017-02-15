@@ -48,7 +48,8 @@ module.exports.init = function (devices, callback) {
             // Keep track of device id
             connection.id = settings.host
             connection.tcpport = settings.tcpport
-            connection.device_data = device.data
+            console.log('received data,' ,device)
+            connection.device_data = device
             // Register the device
             registeredDevices.push(connection)
             // Start listening for Kodi events
@@ -850,16 +851,15 @@ function getKodiInstance (searchParameters) {
   return new Promise(function (resolve, reject) {
     console.log('getKodiInstance', searchParameters)
     // If only 1 registered device, just return it
-    var device = null
+    let device = null
     if (registeredDevices.length === 1 || searchParameters === null) {
       device = registeredDevices[0]
     } else {
       // Search parameters have been provided, look for a device with the supplied ID
-      registeredDevices.filter(function (item) {
+      device = registeredDevices.filter(function (item) {
         return item.id === searchParameters
-      })
+      })[0]
     }
-
     if (device) {
       resolve(device)
     } else {
@@ -873,7 +873,7 @@ function getKodiInstance (searchParameters) {
     - All functions related to event handling
 ************************************/
 function startListeningForEvents (device) {
-  console.log('startListeningForEvents()')
+  console.log('startListeningForEvents(' + device.id + ')')
   // Map supported Kodi events to indidual functions and pass the device connection to trigger the appropriate flows
   device.notification('Player.OnPause', function (result) { onKodiGenericEvent(result, device, 'kodi_pause') })
   device.notification('Player.OnPlay', function (result) { onKodiPlay(result, device) })
@@ -882,7 +882,6 @@ function startListeningForEvents (device) {
   device.notification('System.OnSleep', function (result) { onKodiGenericEvent(result, device, 'kodi_hibernate') })
   device.notification('System.OnRestart', function (result) { onKodiGenericEvent(result, device, 'kodi_reboot') })
   device.notification('System.OnWake', function (result) { onKodiGenericEvent(result, device, 'kodi_wake') })
-
   // Catch error when Kodi suddenly goes offline to prevent the app from crashing
   device.on('error', function (error) {
     console.log('Kodi connection error: ', error)
@@ -936,12 +935,12 @@ function pollReconnect(device){
 function onKodiGenericEvent (result, device, triggerName) {
   console.log('onKodiGenericEvent() ', triggerName)
   // Trigger the flow
-  console.log('Triggering flow ', triggerName)
+  console.log('Triggering flow ', triggerName, ' for(' + device.id + ')')
   Homey.manager('flow').triggerDevice(triggerName, null, null, device.device_data)
 }
 
 function onKodiStop (result, device) {
-  console.log('onKodiStop')
+  console.log('onKodiStop(' + device.id + ')')
   console.log('Triggering flow ', 'kodi_stop')
   Homey.manager('flow').triggerDevice('kodi_stop', null, null, device.device_data)
   // Check if the user stopped a movie/episode halfway or whether the episode/movie actually ended
@@ -956,7 +955,7 @@ function onKodiStop (result, device) {
       device.run('VideoLibrary.GetEpisodeDetails', episodeParams)
         .then(function (episodeResult) {
           // Trigger action kodi_episode_start
-          Homey.log('Triggering flow kodi_episode_stop, tvshow_title: ', episodeResult.episodedetails.showtitle, 'episode_title: ', episodeResult.episodedetails.label, 'season: ', episodeResult.episodedetails.season, 'episode: ', episodeResult.episodedetails.episode)
+          Homey.log('Triggering flow kodi_episode_stop (' + device.id + '), tvshow_title: ', episodeResult.episodedetails.showtitle, 'episode_title: ', episodeResult.episodedetails.label, 'season: ', episodeResult.episodedetails.season, 'episode: ', episodeResult.episodedetails.episode)
           Homey.manager('flow').triggerDevice('kodi_episode_stop', {
             tvshow_title: episodeResult.episodedetails.showtitle,
             episode_title: episodeResult.episodedetails.label,
@@ -974,7 +973,7 @@ function onKodiStop (result, device) {
       device.run('VideoLibrary.GetMovieDetails', movieParams)
         .then(function (movieResult) {
           // Trigger appropriate flows
-          Homey.log('Triggering flow kodi_movie_stop, movie_title: ', movieResult.moviedetails.label, 'device: ', device.device_data)
+          Homey.log('Triggering flow kodi_movie_stop(' + device.id + '), movie_title: ', movieResult.moviedetails.label, 'device: ', device.device_data)
           // Trigger flows and pass variables
           Homey.manager('flow').triggerDevice('kodi_movie_stop', {
             // Pass movie title as flow token
@@ -986,7 +985,7 @@ function onKodiStop (result, device) {
 }
 
 function onKodiPlay (result, device) {
-  console.log('onKodiPlay()')
+  console.log('onKodiPlay(' + device.id + ')')
   // Throw a 'anything started playing' event
   console.log('Triggering flow kodi_playing_something')
   Homey.manager('flow').triggerDevice('kodi_playing_something', null, null, device.device_data)

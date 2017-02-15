@@ -2,7 +2,7 @@
 Adds Kodi support to your Homey!
 
 Currently working:
-- Adding a Kodi instance as a device
+- Adding multiple Kodi instances as a device
 - Playing movies via speech
 - Playing music via speech
   - By artist
@@ -12,8 +12,7 @@ Currently working:
 - Starting addons
 - Various flow triggers / actions
 - Auto reconnection when Kodi has shutdown
-
-Note: Only adding 1 device is currently supported
+- Multi device support
 
 ### Speech support
 EN
@@ -78,7 +77,7 @@ NL
 * Set party mode on
 * Set Volume
 
-Flows are now triggered whenever something happens on Kodi, whether this has been triggered by Homey or any other remote control.
+Flows are triggered whenever something happens on Kodi, whether this has been triggered by Homey or any other remote control.
 
 ### Donate
 Consider buying me a beer if you like this app :-)

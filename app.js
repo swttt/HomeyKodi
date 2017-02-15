@@ -296,98 +296,98 @@ function parseSpeach (speech, callback) {
 ********************/
 function onFlowActionPlayMovieKodi (callback, args) {
   Homey.log('onFlowActionPlayMovieKodi', args)
-  searchAndPlayMovie(args.id, args.movie_title)
+  searchAndPlayMovie(args.kodi.id, args.movie_title)
     .then(function () { callback(null, true) })
     .catch(function (error) { callback(error) })
 }
 
 function onFlowActionPauseResumeKodi (callback, args) {
   Homey.log('onFlowActionPauseResumeKodi()', args)
-  Homey.manager('drivers').getDriver('kodi').playPause(args.id)
+  Homey.manager('drivers').getDriver('kodi').playPause(args.kodi.id)
     .then(function () { callback(null, true) })
     .catch(function (error) { callback(error) })
 }
 
 function onFlowActionStopKodi (callback, args) {
   Homey.log('onFlowActionStopKodi()', args)
-  Homey.manager('drivers').getDriver('kodi').stop(args.id)
+  Homey.manager('drivers').getDriver('kodi').stop(args.kodi.id)
     .then(function () { callback(null, true) })
     .catch(function (error) { callback(error) })
 }
 
 function onFlowActionPlayLatestEpisode (callback, args) {
   Homey.log('onFlowActionPlayLatestEpisode()', args)
-  playLatestEpisode(args.id, args.series_title)
+  playLatestEpisode(args.kodi.id, args.series_title)
     .then(function () { callback(null, true) })
     .catch(function (error) { callback(error) })
 }
 
 function onFlowActionHibernate (callback, args) {
   Homey.log('onFlowActionHibernate()', args)
-  Homey.manager('drivers').getDriver('kodi').hibernateKodi(args.id)
+  Homey.manager('drivers').getDriver('kodi').hibernateKodi(args.kodi.id)
     .then(function () { callback(null, true) })
     .catch(function (error) { callback(error) })
 }
 
 function onFlowActionReboot (callback, args) {
   Homey.log('onFlowActionReboot()', args)
-  Homey.manager('drivers').getDriver('kodi').rebootKodi(args.id)
+  Homey.manager('drivers').getDriver('kodi').rebootKodi(args.kodi.id)
     .then(function () { callback(null, true) })
     .catch(function (error) { callback(error) })
 }
 
 function onFlowActionShutdown (callback, args) {
   Homey.log('onFlowActionShutdown()', args)
-  Homey.manager('drivers').getDriver('kodi').shutdownKodi(args.id)
+  Homey.manager('drivers').getDriver('kodi').shutdownKodi(args.kodi.id)
     .then(function () { callback(null, true) })
     .catch(function (error) { callback(error) })
 }
 
 function onFlowActionPlayMusicByArtist (callback, args) {
   Homey.log('onFlowActionPlayMusicByArtist()', args)
-  searchAndPlayMusic(args.id, 'ARTIST', args.artist)
+  searchAndPlayMusic(args.kodi.id, 'ARTIST', args.artist)
     .then(function () { callback(null, true) })
     .catch(function (error) { callback(error) })
 }
 
 function onFlowActionMuteKodi (callback, args) {
   Homey.log('onFlowActionMuteKodi()', args)
-  Homey.manager('drivers').getDriver('kodi').muteKodi(args.id)
+  Homey.manager('drivers').getDriver('kodi').muteKodi(args.kodi.id)
     .then(function () { callback(null, true) })
     .catch(function (error) { callback(error) })
 }
 
 function onFlowActionUnmuteKodi (callback, args) {
   Homey.log('onFlowActionMuteKodi()', args)
-  Homey.manager('drivers').getDriver('kodi').unmuteKodi(args.id)
+  Homey.manager('drivers').getDriver('kodi').unmuteKodi(args.kodi.id)
     .then(function () { callback(null, true) })
     .catch(function (error) { callback(error) })
 }
 
 function onFlowActionSubtitleOn (callback, args) {
   Homey.log('onFlowActionSubtitleOn()', args)
-  Homey.manager('drivers').getDriver('kodi').setSubtitle(args.id, 'on')
+  Homey.manager('drivers').getDriver('kodi').setSubtitle(args.kodi.id, 'on')
     .then(function () { callback(null, true) })
     .catch(function (error) { callback(error) })
 }
 
 function onFlowActionSubtitleOff (callback, args) {
   Homey.log('onFlowActionSubtitleOff()', args)
-  Homey.manager('drivers').getDriver('kodi').setSubtitle(args.id, 'off')
+  Homey.manager('drivers').getDriver('kodi').setSubtitle(args.kodi.id, 'off')
     .then(function () { callback(null, true) })
     .catch(function (error) { callback(error) })
 }
 
 function onFlowActionSetPartyMode (callback, args) {
   Homey.log('onFlowActionSetPartyMode()', args)
-  Homey.manager('drivers').getDriver('kodi').setPartyMode(args.id, args.onoff)
+  Homey.manager('drivers').getDriver('kodi').setPartyMode(args.kodi.id, args.onoff)
     .then(function () { callback(null, true) })
     .catch(function (error) { callback(error) })
 }
 
 function onFlowActionSetVolume (callback, args) {
   Homey.log('onFlowActionSetVolume()', args)
-  Homey.manager('drivers').getDriver('kodi').setVolume(args.id, args.volume)
+  Homey.manager('drivers').getDriver('kodi').setVolume(args.kodi.id, args.volume)
     .then(function () { callback(null, true) })
     .catch(function (error) { callback(error) })
 }
