@@ -55,7 +55,8 @@
     },
 		"feedback":{
 			"could_not_connect": "Kon geen verbinding maken met Kodi. Check je connectie gegevens.",
-			"succesfully_connected": "Connectie succesvol!"
+			"succesfully_connected": "Connectie succesvol!",
+			"device_already_exists": "Dit kodi apparaat is al toegevoegd."
 		}
 	 },
 	 "settings":{

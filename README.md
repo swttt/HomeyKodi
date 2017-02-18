@@ -46,9 +46,9 @@ NL
 
 ### Flow support
 *Triggers*
-* On movie start
+* On movie start (doesn't work with every version of Kodi)
 * On movie stop (when a movie ends, including credits)
-* On episode start
+* On episode start (doesn't work with every version of Kodi)
 * On episode stop (when an episode, including credits)
 * On playback start (anything starts playing)
 * On pause  

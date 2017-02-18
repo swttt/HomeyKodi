@@ -55,7 +55,8 @@
     },
 		"feedback":{
 			"could_not_connect": "Could not connect to your Kodi! Please verify your details.",
-			"succesfully_connected": "Connection succesful!"
+			"succesfully_connected": "Connection succesful!",
+			"device_already_exists": "This device has already been added."
 		}
 	 },
 	 "settings":{

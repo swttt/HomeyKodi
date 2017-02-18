@@ -48,7 +48,6 @@ module.exports.init = function (devices, callback) {
             // Keep track of device id
             connection.id = settings.host
             connection.tcpport = settings.tcpport
-            console.log('received data,' ,device)
             connection.device_data = device
             // Register the device
             registeredDevices.push(connection)
@@ -73,9 +72,12 @@ module.exports.init = function (devices, callback) {
 module.exports.pair = function (socket) {
   // Link the configure function to the front end
   socket.on('configure_kodi', function (device, callback) {
-    // data contains connections data of kodi
-    // Try to connect and register device
-    KodiWs(device.settings.host, device.settings.tcpport)
+    // Check if the device has already been added
+    if(registeredDevices.some(function(item){return item.id === device.settings.host})) {
+      callback(__('pair.feedback.device_already_exists'))
+    } else {
+      // Try to connect and register device
+      KodiWs(device.settings.host, device.settings.tcpport)
       .then(function (connection) {
         // Keep track of device id
         connection.id = device.settings.host
@@ -90,6 +92,7 @@ module.exports.pair = function (socket) {
       .catch(function (err) {
         callback(__('pair.feedback.could_not_connect') + ' ' + err)
       })
+    }
   })
 
   socket.on('disconnect', function () {
@@ -99,9 +102,7 @@ module.exports.pair = function (socket) {
 
 // Device gets deleted
 module.exports.deleted = function (device_data) {
-  console.log('Deleting device', device_data.id)
-  // Create a new array without the deleted device
-  deleteDevice(device_data.id)
+  unregisterDevice(device_data.id)
 }
 
 // A user has updated settings, update the device object
@@ -111,7 +112,7 @@ module.exports.settings = function (device_data, newSettingsObj, oldSettingsObj,
   KodiWs(newSettingsObj.host, newSettingsObj.tcpport)
     .then(function (connection) {
       // Create a new array without the updated device
-      deleteDevice(device_data.id)
+      unregisterDevice(device_data.id)
       // Keep track of the device id and port
       connection.id = newSettingsObj.host
       connection.tcpport = newSettingsObj.tcpport
@@ -846,6 +847,21 @@ function deleteDevice (deviceId) {
   })
 }
 
+function unregisterDevice (deviceId) {
+  // Lookup the device
+  let device = registeredDevices.filter(function(item){
+    return item.id === deviceId
+  })[0]
+  // Delete the reconnect timer
+  clearInterval(device.reconnectTimer)
+  console.log('Deleting device', deviceId)
+  // Create a new array without the deleted device
+  deleteDevice(deviceId)
+  // Remove all listeners
+  device.socket.removeAllListeners()
+  device.removeAllListeners()
+}
+
 // Return the Kodi device specified by the search parameters
 function getKodiInstance (searchParameters) {
   return new Promise(function (resolve, reject) {
@@ -914,22 +930,24 @@ function pollReconnect(device){
         // Keep track of device id
         connection.id = device.id
         connection.tcpport = device.tcpport
-        connection.device_data = device.data
+        connection.device_data = device.device_data
         // Register the device
         registeredDevices.push(connection)
         // Start listening for Kodi events
         startListeningForEvents(connection)
         console.log('Triggering kodi_reconnect')
         // Trigger kodi reconnect flow
-        Homey.manager('flow').triggerDevice('kodi_reconnects', null, null, device.data)
+        Homey.manager('flow').triggerDevice('kodi_reconnects', null, null, device.device_data)
       })
       .catch(function (err) {
         console.log('Stil cannot reconnect: ', err)
-        setTimeout(reconnect, CONNECT_INTERVAL)
+        device.reconnectTimer = setTimeout(reconnect, CONNECT_INTERVAL)
       })
   }
-
-  reconnect()
+  // Check if a timer has already been set for the device
+  if(!device.reconnectTimer){
+    reconnect()  
+  }
 }
 
 function onKodiGenericEvent (result, device, triggerName) {
@@ -989,7 +1007,6 @@ function onKodiPlay (result, device) {
   // Throw a 'anything started playing' event
   console.log('Triggering flow kodi_playing_something')
   Homey.manager('flow').triggerDevice('kodi_playing_something', null, null, device.device_data)
-
   // Check if there's a new song/movie/episode playback or a resume action (player % > 1)
   // Build request parameters and supply the player
   var params = {
