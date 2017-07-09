@@ -5,7 +5,7 @@
     "nl": "Kodi"
   },
   "description": {
-    "en": "Control your Kodi device with Homey!",    
+    "en": "Control your Kodi device with Homey!",
     "nl": "Bestuur je Kodi apparaat met Homey!"
   },
   "version": "1.9.0",
@@ -19,44 +19,43 @@
     "email": "marvinschenkel@gmail.com",
     "website": "https://linkedin.com/in/marvinschenkel"
   },
-  "speech":[
-    {
+  "speech": [{
       "id": "kodi_play_movie",
       "importance": 0.7,
-      "triggers" : {
-        "en" : ["play movie"],
-        "nl" : ["speel film", "speel de film", "start film", "start de film"]
+      "triggers": {
+        "en": ["play movie"],
+        "nl": ["speel film", "speel de film", "start film", "start de film"]
       }
     },
     {
       "id": "kodi_play_tvshow",
       "importance": 1,
-      "triggers" : {
-        "en" : ["play tv show"],
-        "nl" : ["speel serie", "speel de serie", "start serie", "start de serie"]
+      "triggers": {
+        "en": ["play tv show"],
+        "nl": ["speel serie", "speel de serie", "start serie", "start de serie"]
       }
     },
     {
       "id": "kodi_play_music",
       "importance": 0.7,
-      "triggers" : {
-        "en" : ["play music"],
+      "triggers": {
+        "en": ["play music"],
         "nl": ["speel muziek"]
       }
     },
     {
       "id": "kodi_play_pause",
       "importance": 0.7,
-      "triggers" : {
-        "en" : ["pause", "resume"],
-        "nl" : ["pauze", "hervat"]
+      "triggers": {
+        "en": ["pause", "resume"],
+        "nl": ["pauze", "hervat"]
       }
     },
     {
       "id": "kodi_stop",
       "importance": 0.7,
-      "triggers" : {
-        "en" : ["stop", "exit", "quit"],
+      "triggers": {
+        "en": ["stop", "exit", "quit"],
         "nl": ["stop"]
       }
     },
@@ -64,7 +63,7 @@
       "id": "kodi_next",
       "importance": 0.7,
       "triggers": {
-        "en" : ["next track"],
+        "en": ["next track"],
         "nl": ["volgende"]
       }
     },
@@ -72,505 +71,460 @@
       "id": "kodi_previous",
       "importance": 0.7,
       "triggers": {
-        "en" : ["previous track"],
+        "en": ["previous track"],
         "nl": ["vorige"]
       }
     },
     {
-       "id": "kodi_play_latest_episode",
-       "importance": 1,
-       "triggers": {
-         "en": ["play latest episode of", "play the latest episode of", "play latest episode", "play the latest episode"],
-         "nl": ["speel de laatste aflevering", "speel de laatste aflevering van", "speel laatste aflevering", "start de laatste aflevering", "start de laatste aflevering van", "start laatste aflevering"]
-       }
+      "id": "kodi_play_latest_episode",
+      "importance": 1,
+      "triggers": {
+        "en": ["play latest episode of", "play the latest episode of", "play latest episode", "play the latest episode"],
+        "nl": ["speel de laatste aflevering", "speel de laatste aflevering van", "speel laatste aflevering", "start de laatste aflevering", "start de laatste aflevering van", "start laatste aflevering"]
+      }
     },
     {
       "id": "kodi_watch_something",
       "importance": 1,
-      "triggers" : {
-        "en" : ["watch something"],
+      "triggers": {
+        "en": ["watch something"],
         "nl": ["iets kijken"]
       }
     },
     {
       "id": "kodi_watch_movie",
       "importance": 1,
-      "triggers" : {
-        "en" : ["watch a movie", "watch movie"],
+      "triggers": {
+        "en": ["watch a movie", "watch movie"],
         "nl": ["film kijken"]
       }
     },
     {
       "id": "kodi_hibernate",
       "importance": 0.5,
-      "triggers" : {
-        "en" : ["hibernate kodi"],
+      "triggers": {
+        "en": ["hibernate kodi"],
         "nl": ["slaap kodi"]
       }
     },
     {
       "id": "kodi_shutdown",
       "importance": 0.5,
-      "triggers" : {
-        "en" : ["shutdown kodi"],
+      "triggers": {
+        "en": ["shutdown kodi"],
         "nl": ["kodi afsluiten"]
       }
     },
     {
       "id": "kodi_reboot",
       "importance": 0.5,
-      "triggers" : {
-        "en" : ["reboot kodi"],
+      "triggers": {
+        "en": ["reboot kodi"],
         "nl": ["kodi herstarten"]
       }
     },
     {
       "id": "kodi_start_addon",
       "importance": 0.8,
-      "triggers" : {
-        "en" : ["start addon", "start add on", "start program"],
+      "triggers": {
+        "en": ["start addon", "start add on", "start program"],
         "nl": ["start addon", "start add on", "start programma"]
       }
     },
     {
       "id": "kodi_new_movies",
       "importance": 0.8,
-      "triggers" : {
-        "en" : ["new movie", "new movies"],
+      "triggers": {
+        "en": ["new movie", "new movies"],
         "nl": ["nieuwe film", "nieuwe films"]
       }
     },
     {
       "id": "kodi_new_episodes",
       "importance": 0.8,
-      "triggers" : {
-        "en" : ["new episode", "new episodes", "new tv show", "new tv shows"],
+      "triggers": {
+        "en": ["new episode", "new episodes", "new tv show", "new tv shows"],
         "nl": ["nieuwe aflevering", "nieuwe afleveringen"]
       }
     }
-    
+
   ],
-  "drivers": [
-    {
-      "id": "kodi",
-      "name": {
-        "en": "Kodi"
-      },
-      "images": {
-        "large": "./drivers/kodi/assets/images/large.png",
-        "small": "./drivers/kodi/assets/images/small.png"
-      },
-      "class": "other",
-      
-      "capabilities": [ ],
-      "pair": [
-        {
-          "id": "configure_kodi"
-        }
-        ,
-        {
-          "id": "add_kodis",
-          "template": "add_devices"
-        }
-      ],
-      "settings": [
-        {
-          "type": "group",
-          "label": {
-            "en": "Kodi settings",
-            "nl": "Kodi instellingen"
-          },
-          "children": [
-            {
-              "id": "host",
-              "type": "text",
-              "value":"0.0.0.0",
-              "label": {
-                "en": "(Local) IP Address of Kodi",
-                "nl": "(Lokale) IP adres van Kodi"
-              }
-            },
-            {
-              "id": "tcpport",
-              "type": "text",
-              "value":"9090",
-              "label": {
-                "en": "TCP Port",
-                "nl": "TCP Poort"
-              }
-            }
-          ]
-        }
-      ]
-    }
-  ],
-  "images":{
-    "large":"./assets/images/large.png",
-    "small":"./assets/images/small.png"
-  },
-  "flow":	{
-    "triggers":[
-      {
-        "id":"kodi_movie_start",
-        "title": {
-          "en":"A movie has started",          
-          "nl":"Een film begint"
-        },
-        "args": [
-          {
-            "name": "kodi",
-            "type": "device",
-            "filter": "driver_uri=homey:app:nl.marvinschenkel.kodi&driver_id=kodi",
-            "placeholder": { 
-              "en": "Which Kodi device", 
-              "nl": "Welk Kodi apparaat" 
-             }
-          }
-        ],
-        "tokens":[
-          {
-            "name":"movie_title",
-            "title": {
-              "en":"Title",
-              "nl":"Titel"
-            },
-            "example":{
-              "en":"Finding Nemo",
-              "nl":"Finding Nemo"
-            }
-          }
-        ]
+  "drivers": [{
+    "id": "kodi",
+    "name": {
+      "en": "Kodi"
+    },
+    "images": {
+      "large": "./drivers/kodi/assets/images/large.png",
+      "small": "./drivers/kodi/assets/images/small.png"
+    },
+    "class": "other",
+
+    "capabilities": [],
+    "pair": [{
+        "id": "configure_kodi"
       },
       {
-        "id":"kodi_movie_stop",
-        "title": {
-          "en":"A movie has stopped",          
-          "nl":"Een film stopt"
-        },
-        "args": [
-          {
-            "name": "kodi",
-            "type": "device",
-            "filter": "driver_uri=homey:app:nl.marvinschenkel.kodi&driver_id=kodi",
-            "placeholder": { 
-              "en": "Which Kodi device", 
-              "nl": "Welk Kodi apparaat" 
-             }
-          }
-        ],
-        "tokens":[
-          {
-            "name":"movie_title",
-            "title": {
-              "en":"Title",
-              "nl":"Titel"
-            },
-            "example":{
-              "en":"Finding Nemo",
-              "nl":"Finding Nemo"
-            }
-          }
-        ]
-      },
-      {
-        "id":"kodi_song_start",
-        "title": {
-          "en":"A song starts playing",          
-          "nl":"Er wordt muziek afgespeeld"
-        },
-        "args": [
-          {
-            "name": "kodi",
-            "type": "device",
-            "filter": "driver_uri=homey:app:nl.marvinschenkel.kodi&driver_id=kodi",
-            "placeholder": { 
-              "en": "Which Kodi device", 
-              "nl": "Welk Kodi apparaat" 
-             }
-          }
-        ],
-        "tokens":[
-          {
-            "name":"artist",
-            "title": {
-              "en":"Artist",
-              "nl":"Artiest"
-            },
-            "example":{
-              "en":"Gareth Emery",
-              "nl":"Gareth Emery"
-            }
-          },
-          {
-            "name":"song_title",
-            "title": {
-              "en":"Title",
-              "nl":"Titel"
-            },
-            "example":{
-              "en":"Soldier",
-              "nl":"Soldier"
-            }
-          }
-        ]
-      },
-      {
-        "id":"kodi_episode_start",
-        "title": {
-          "en":"An episode has started",
-          "nl":"Een aflevering begint"
-        },
-        "args": [
-          {
-            "name": "kodi",
-            "type": "device",
-            "filter": "driver_uri=homey:app:nl.marvinschenkel.kodi&driver_id=kodi"
-          }
-        ],
-        "tokens":[
-          {
-            "name":"tvshow_title",
-            "title": {
-              "en":"Show",
-              "nl":"Serie"
-            },
-            "example":{
-              "en":"The Walking Dead",
-              "nl":"The Walking Dead"
-            }
-          },
-          {
-            "name":"episode_title",
-            "title": {
-              "en":"Episode",
-              "nl":"Aflevering"
-            },
-            "example":{
-              "en":"First Time Again",
-              "nl":"First Time Again"
-            }
-          },
-          {
-            "name":"season",
-            "title": {
-              "en":"Sea #",
-              "nl":"Sei #"
-            },
-            "example":{
-              "en":"1",
-              "nl":"1"
-            }
-          },
-          {
-            "name":"episode",
-            "title": {
-              "en":"Ep #",
-              "nl":"Afl #"
-            },
-            "example":{
-              "en":"2",
-              "nl":"2"
-            }
-          }
-        ]
-      },
-      {
-        "id":"kodi_episode_stop",
-        "title": {
-          "en":"An episode has stopped",
-          "nl":"Een aflevering stopt"
-        },
-        "args": [
-          {
-            "name": "kodi",
-            "type": "device",
-            "filter": "driver_uri=homey:app:nl.marvinschenkel.kodi&driver_id=kodi"
-          }
-        ],
-        "tokens":[
-          {
-            "name":"tvshow_title",
-            "title": {
-              "en":"Show",
-              "nl":"Serie"
-            },
-            "example":{
-              "en":"The Walking Dead",
-              "nl":"The Walking Dead"
-            }
-          },
-          {
-            "name":"episode_title",
-            "title": {
-              "en":"Episode",
-              "nl":"Aflevering"
-            },
-            "example":{
-              "en":"First Time Again",
-              "nl":"First Time Again"
-            }
-          },
-          {
-            "name":"season",
-            "title": {
-              "en":"Sea #",
-              "nl":"Sei #"
-            },
-            "example":{
-              "en":"1",
-              "nl":"1"
-            }
-          },
-          {
-            "name":"episode",
-            "title": {
-              "en":"Ep #",
-              "nl":"Afl #"
-            },
-            "example":{
-              "en":"2",
-              "nl":"2"
-            }
-          }
-        ]
-      },
-      {
-        "id":"kodi_playing_something",
-        "title": {
-          "en":"Kodi starts playing something",
-          "nl": "Kodi start met iets afspelen"
-        },
-        "args": [
-          {
-            "name": "kodi",
-            "type": "device",
-            "filter": "driver_uri=homey:app:nl.marvinschenkel.kodi&driver_id=kodi"
-          }
-        ]
-      },
-      {
-        "id":"kodi_reconnects",
-        "title": {
-          "en":"Homey reconnects to Kodi",
-          "nl": "Homey (her) verbindt met Kodi"
-        },
-        "args": [
-          {
-            "name": "kodi",
-            "type": "device",
-            "filter": "driver_uri=homey:app:nl.marvinschenkel.kodi&driver_id=kodi"
-          }
-        ]
-      },
-      {
-        "id":"kodi_pause",
-        "title": {
-          "en":"Kodi has been paused",
-          "nl": "Kodi is gepauzeerd"
-        },
-        "args": [
-          {
-            "name": "kodi",
-            "type": "device",
-            "filter": "driver_uri=homey:app:nl.marvinschenkel.kodi&driver_id=kodi"
-          }
-        ]
-      },
-      {
-        "id":"kodi_resume",
-        "title": {
-          "en":"Kodi has been resumed",
-          "nl":"Kodi begint weer af te spelen"
-        },
-        "args": [
-          {
-            "name": "kodi",
-            "type": "device",
-            "filter": "driver_uri=homey:app:nl.marvinschenkel.kodi&driver_id=kodi"
-          }
-        ]
-      },
-      {
-        "id":"kodi_stop",        
-        "title": {
-          "en":"Kodi has been stopped",
-          "nl": "Kodi is gestopt"
-        },
-        "args": [
-          {
-            "name": "kodi",
-            "type": "device",
-            "filter": "driver_uri=homey:app:nl.marvinschenkel.kodi&driver_id=kodi"
-          }
-        ]
-      },
-      {
-        "id":"kodi_hibernate",
-        "title": {
-          "en":"Kodi is going to hibernate",
-          "nl": "Kodi gaat in slaapstand"
-        },
-        "args": [
-          {
-            "name": "kodi",
-            "type": "device",
-            "filter": "driver_uri=homey:app:nl.marvinschenkel.kodi&driver_id=kodi"
-          }
-        ]
-      },
-      {
-        "id":"kodi_reboot",
-        "title": {
-          "en":"Kodi is going to reboot",
-          "nl": "Kodi wordt herstart"
-        },
-        "args": [
-          {
-            "name": "kodi",
-            "type": "device",
-            "filter": "driver_uri=homey:app:nl.marvinschenkel.kodi&driver_id=kodi"
-          }
-        ]
-      },
-      {
-        "id":"kodi_shutdown",
-        "title": {
-          "en":"Kodi is going to shutdown",
-          "nl": "Kodi wordt afgesloten"
-        },
-        "args": [
-          {
-            "name": "kodi",
-            "type": "device",
-            "filter": "driver_uri=homey:app:nl.marvinschenkel.kodi&driver_id=kodi"
-          }
-        ]
-      },
-      {
-        "id":"kodi_wake",
-        "title": {
-          "en":"Kodi woke up from hibernate",
-          "nl": "Kodi is actief na slaapstand"
-        },
-        "args": [
-          {
-            "name": "kodi",
-            "type": "device",
-            "filter": "driver_uri=homey:app:nl.marvinschenkel.kodi&driver_id=kodi"
-          }
-        ]
+        "id": "add_kodis",
+        "template": "add_devices"
       }
     ],
-    "actions":[
+    "settings": [{
+      "type": "group",
+      "label": {
+        "en": "Kodi settings",
+        "nl": "Kodi instellingen"
+      },
+      "children": [{
+          "id": "host",
+          "type": "text",
+          "value": "0.0.0.0",
+          "label": {
+            "en": "(Local) IP Address of Kodi",
+            "nl": "(Lokale) IP adres van Kodi"
+          }
+        },
+        {
+          "id": "tcpport",
+          "type": "text",
+          "value": "9090",
+          "label": {
+            "en": "TCP Port",
+            "nl": "TCP Poort"
+          }
+        }
+      ]
+    }]
+  }],
+  "images": {
+    "large": "./assets/images/large.png",
+    "small": "./assets/images/small.png"
+  },
+  "flow": {
+    "triggers": [{
+        "id": "kodi_movie_start",
+        "title": {
+          "en": "A movie has started",
+          "nl": "Een film begint"
+        },
+        "args": [{
+          "name": "kodi",
+          "type": "device",
+          "filter": "driver_uri=homey:app:nl.marvinschenkel.kodi&driver_id=kodi",
+          "placeholder": {
+            "en": "Which Kodi device",
+            "nl": "Welk Kodi apparaat"
+          }
+        }],
+        "tokens": [{
+          "name": "movie_title",
+          "title": {
+            "en": "Title",
+            "nl": "Titel"
+          },
+          "example": {
+            "en": "Finding Nemo",
+            "nl": "Finding Nemo"
+          }
+        }]
+      },
       {
+        "id": "kodi_movie_stop",
+        "title": {
+          "en": "A movie has stopped",
+          "nl": "Een film stopt"
+        },
+        "args": [{
+          "name": "kodi",
+          "type": "device",
+          "filter": "driver_uri=homey:app:nl.marvinschenkel.kodi&driver_id=kodi",
+          "placeholder": {
+            "en": "Which Kodi device",
+            "nl": "Welk Kodi apparaat"
+          }
+        }],
+        "tokens": [{
+          "name": "movie_title",
+          "title": {
+            "en": "Title",
+            "nl": "Titel"
+          },
+          "example": {
+            "en": "Finding Nemo",
+            "nl": "Finding Nemo"
+          }
+        }]
+      },
+      {
+        "id": "kodi_song_start",
+        "title": {
+          "en": "A song starts playing",
+          "nl": "Er wordt muziek afgespeeld"
+        },
+        "args": [{
+          "name": "kodi",
+          "type": "device",
+          "filter": "driver_uri=homey:app:nl.marvinschenkel.kodi&driver_id=kodi",
+          "placeholder": {
+            "en": "Which Kodi device",
+            "nl": "Welk Kodi apparaat"
+          }
+        }],
+        "tokens": [{
+            "name": "artist",
+            "title": {
+              "en": "Artist",
+              "nl": "Artiest"
+            },
+            "example": {
+              "en": "Gareth Emery",
+              "nl": "Gareth Emery"
+            }
+          },
+          {
+            "name": "song_title",
+            "title": {
+              "en": "Title",
+              "nl": "Titel"
+            },
+            "example": {
+              "en": "Soldier",
+              "nl": "Soldier"
+            }
+          }
+        ]
+      },
+      {
+        "id": "kodi_episode_start",
+        "title": {
+          "en": "An episode has started",
+          "nl": "Een aflevering begint"
+        },
+        "args": [{
+          "name": "kodi",
+          "type": "device",
+          "filter": "driver_uri=homey:app:nl.marvinschenkel.kodi&driver_id=kodi"
+        }],
+        "tokens": [{
+            "name": "tvshow_title",
+            "title": {
+              "en": "Show",
+              "nl": "Serie"
+            },
+            "example": {
+              "en": "The Walking Dead",
+              "nl": "The Walking Dead"
+            }
+          },
+          {
+            "name": "episode_title",
+            "title": {
+              "en": "Episode",
+              "nl": "Aflevering"
+            },
+            "example": {
+              "en": "First Time Again",
+              "nl": "First Time Again"
+            }
+          },
+          {
+            "name": "season",
+            "title": {
+              "en": "Sea #",
+              "nl": "Sei #"
+            },
+            "example": {
+              "en": "1",
+              "nl": "1"
+            }
+          },
+          {
+            "name": "episode",
+            "title": {
+              "en": "Ep #",
+              "nl": "Afl #"
+            },
+            "example": {
+              "en": "2",
+              "nl": "2"
+            }
+          }
+        ]
+      },
+      {
+        "id": "kodi_episode_stop",
+        "title": {
+          "en": "An episode has stopped",
+          "nl": "Een aflevering stopt"
+        },
+        "args": [{
+          "name": "kodi",
+          "type": "device",
+          "filter": "driver_uri=homey:app:nl.marvinschenkel.kodi&driver_id=kodi"
+        }],
+        "tokens": [{
+            "name": "tvshow_title",
+            "title": {
+              "en": "Show",
+              "nl": "Serie"
+            },
+            "example": {
+              "en": "The Walking Dead",
+              "nl": "The Walking Dead"
+            }
+          },
+          {
+            "name": "episode_title",
+            "title": {
+              "en": "Episode",
+              "nl": "Aflevering"
+            },
+            "example": {
+              "en": "First Time Again",
+              "nl": "First Time Again"
+            }
+          },
+          {
+            "name": "season",
+            "title": {
+              "en": "Sea #",
+              "nl": "Sei #"
+            },
+            "example": {
+              "en": "1",
+              "nl": "1"
+            }
+          },
+          {
+            "name": "episode",
+            "title": {
+              "en": "Ep #",
+              "nl": "Afl #"
+            },
+            "example": {
+              "en": "2",
+              "nl": "2"
+            }
+          }
+        ]
+      },
+      {
+        "id": "kodi_playing_something",
+        "title": {
+          "en": "Kodi starts playing something",
+          "nl": "Kodi start met iets afspelen"
+        },
+        "args": [{
+          "name": "kodi",
+          "type": "device",
+          "filter": "driver_uri=homey:app:nl.marvinschenkel.kodi&driver_id=kodi"
+        }]
+      },
+      {
+        "id": "kodi_reconnects",
+        "title": {
+          "en": "Homey reconnects to Kodi",
+          "nl": "Homey (her) verbindt met Kodi"
+        },
+        "args": [{
+          "name": "kodi",
+          "type": "device",
+          "filter": "driver_uri=homey:app:nl.marvinschenkel.kodi&driver_id=kodi"
+        }]
+      },
+      {
+        "id": "kodi_pause",
+        "title": {
+          "en": "Kodi has been paused",
+          "nl": "Kodi is gepauzeerd"
+        },
+        "args": [{
+          "name": "kodi",
+          "type": "device",
+          "filter": "driver_uri=homey:app:nl.marvinschenkel.kodi&driver_id=kodi"
+        }]
+      },
+      {
+        "id": "kodi_resume",
+        "title": {
+          "en": "Kodi has been resumed",
+          "nl": "Kodi begint weer af te spelen"
+        },
+        "args": [{
+          "name": "kodi",
+          "type": "device",
+          "filter": "driver_uri=homey:app:nl.marvinschenkel.kodi&driver_id=kodi"
+        }]
+      },
+      {
+        "id": "kodi_stop",
+        "title": {
+          "en": "Kodi has been stopped",
+          "nl": "Kodi is gestopt"
+        },
+        "args": [{
+          "name": "kodi",
+          "type": "device",
+          "filter": "driver_uri=homey:app:nl.marvinschenkel.kodi&driver_id=kodi"
+        }]
+      },
+      {
+        "id": "kodi_hibernate",
+        "title": {
+          "en": "Kodi is going to hibernate",
+          "nl": "Kodi gaat in slaapstand"
+        },
+        "args": [{
+          "name": "kodi",
+          "type": "device",
+          "filter": "driver_uri=homey:app:nl.marvinschenkel.kodi&driver_id=kodi"
+        }]
+      },
+      {
+        "id": "kodi_reboot",
+        "title": {
+          "en": "Kodi is going to reboot",
+          "nl": "Kodi wordt herstart"
+        },
+        "args": [{
+          "name": "kodi",
+          "type": "device",
+          "filter": "driver_uri=homey:app:nl.marvinschenkel.kodi&driver_id=kodi"
+        }]
+      },
+      {
+        "id": "kodi_shutdown",
+        "title": {
+          "en": "Kodi is going to shutdown",
+          "nl": "Kodi wordt afgesloten"
+        },
+        "args": [{
+          "name": "kodi",
+          "type": "device",
+          "filter": "driver_uri=homey:app:nl.marvinschenkel.kodi&driver_id=kodi"
+        }]
+      },
+      {
+        "id": "kodi_wake",
+        "title": {
+          "en": "Kodi woke up from hibernate",
+          "nl": "Kodi is actief na slaapstand"
+        },
+        "args": [{
+          "name": "kodi",
+          "type": "device",
+          "filter": "driver_uri=homey:app:nl.marvinschenkel.kodi&driver_id=kodi"
+        }]
+      }
+    ],
+    "actions": [{
         "id": "play_movie_kodi",
         "title": {
-          "en" : "Play a movie on Kodi",
-          "nl":"Speel een film af op Kodi"
+          "en": "Play a movie on Kodi",
+          "nl": "Speel een film af op Kodi"
         },
         "fluidArgs": true,
-        "args":[
-          {
+        "args": [{
             "name": "kodi",
             "type": "device",
             "filter": "driver_uri=homey:app:nl.marvinschenkel.kodi&driver_id=kodi"
@@ -578,8 +532,8 @@
           {
             "name": "movie_title",
             "type": "text",
-            "placeholder" : {
-              "en" : "Type a movie title that's in your library",
+            "placeholder": {
+              "en": "Type a movie title that's in your library",
               "nl": "Voer een film uit je bibliotheek in"
             }
           }
@@ -588,12 +542,11 @@
       {
         "id": "play_latest_episode_kodi",
         "title": {
-          "en" : "Play the latest episode of a series on Kodi",
-          "nl":"Speel de laatste aflevering van een serie af op Kodi"
+          "en": "Play the latest episode of a series on Kodi",
+          "nl": "Speel de laatste aflevering van een serie af op Kodi"
         },
         "fluidArgs": true,
-        "args":[
-          {
+        "args": [{
             "name": "kodi",
             "type": "device",
             "filter": "driver_uri=homey:app:nl.marvinschenkel.kodi&driver_id=kodi"
@@ -601,8 +554,8 @@
           {
             "name": "series_title",
             "type": "text",
-            "placeholder" : {
-              "en" : "Type a series title that's in your library",
+            "placeholder": {
+              "en": "Type a series title that's in your library",
               "nl": "Voer een serie uit je bibliotheek in"
             }
           }
@@ -611,12 +564,11 @@
       {
         "id": "play_music_by_artist",
         "title": {
-          "en" : "Play music by artist",
-          "nl":"Speel muziek van artiest"
+          "en": "Play music by artist",
+          "nl": "Speel muziek van artiest"
         },
         "fluidArgs": true,
-        "args":[
-          {
+        "args": [{
             "name": "kodi",
             "type": "device",
             "filter": "driver_uri=homey:app:nl.marvinschenkel.kodi&driver_id=kodi"
@@ -624,8 +576,8 @@
           {
             "name": "artist",
             "type": "text",
-            "placeholder" : {
-              "en" : "Type an artist in your library",
+            "placeholder": {
+              "en": "Type an artist in your library",
               "nl": "Voer een artiest uit je bibliotheek in"
             }
           }
@@ -634,12 +586,11 @@
       {
         "id": "set_volume",
         "title": {
-          "en" : "Set the volume of Kodi",
-          "nl":"Stel het volume van Kodi in"
+          "en": "Set the volume of Kodi",
+          "nl": "Stel het volume van Kodi in"
         },
         "fluidArgs": true,
-        "args":[
-          {
+        "args": [{
             "name": "kodi",
             "type": "device",
             "filter": "driver_uri=homey:app:nl.marvinschenkel.kodi&driver_id=kodi"
@@ -649,7 +600,7 @@
             "type": "range",
             "min": 1,
             "max": 100,
-            "step": 1, 
+            "step": 1,
             "label": "%",
             "labelMultiplier": 1,
             "labelDecimals": 0
@@ -657,158 +608,155 @@
         ]
       },
       {
-        "id": "pause_resume_kodi",
+        "id": "send_notification",
         "title": {
-          "en" : "Pause / resume playback on Kodi",
-          "nl" : "Pauzeer / hervat Kodi"
+          "en": "Send a notification",
+          "nl": "Stuur een notificatie"
         },
         "fluidArgs": true,
-        "args":[
-          {
+        "args": [{
             "name": "kodi",
             "type": "device",
             "filter": "driver_uri=homey:app:nl.marvinschenkel.kodi&driver_id=kodi"
+          },
+          {
+            "name": "message",
+            "type": "text"
           }
         ]
+      },
+      {
+        "id": "pause_resume_kodi",
+        "title": {
+          "en": "Pause / resume playback on Kodi",
+          "nl": "Pauzeer / hervat Kodi"
+        },
+        "fluidArgs": true,
+        "args": [{
+          "name": "kodi",
+          "type": "device",
+          "filter": "driver_uri=homey:app:nl.marvinschenkel.kodi&driver_id=kodi"
+        }]
       },
       {
         "id": "stop_kodi",
         "title": {
-          "en" : "Stop playback on Kodi",
-          "nl" : "Stop afspelen op Kodi"
+          "en": "Stop playback on Kodi",
+          "nl": "Stop afspelen op Kodi"
         },
         "fluidArgs": true,
-        "args":[
-          {
-            "name": "kodi",
-            "type": "device",
-            "filter": "driver_uri=homey:app:nl.marvinschenkel.kodi&driver_id=kodi"
-          }
-        ]
+        "args": [{
+          "name": "kodi",
+          "type": "device",
+          "filter": "driver_uri=homey:app:nl.marvinschenkel.kodi&driver_id=kodi"
+        }]
       },
       {
         "id": "hibernate_kodi",
         "title": {
-          "en" : "Hibernate Kodi",
-          "nl" : "Zet Kodi in slaapstand"
+          "en": "Hibernate Kodi",
+          "nl": "Zet Kodi in slaapstand"
         },
         "fluidArgs": true,
-        "args":[
-          {
-            "name": "kodi",
-            "type": "device",
-            "filter": "driver_uri=homey:app:nl.marvinschenkel.kodi&driver_id=kodi"
-          }
-        ]
+        "args": [{
+          "name": "kodi",
+          "type": "device",
+          "filter": "driver_uri=homey:app:nl.marvinschenkel.kodi&driver_id=kodi"
+        }]
       },
       {
         "id": "reboot_kodi",
         "title": {
-          "en" : "Reboot Kodi",
-          "nl" : "Herstart Kodi"
+          "en": "Reboot Kodi",
+          "nl": "Herstart Kodi"
         },
         "fluidArgs": true,
-        "args":[
-          {
-            "name": "kodi",
-            "type": "device",
-            "filter": "driver_uri=homey:app:nl.marvinschenkel.kodi&driver_id=kodi"
-          }
-        ]
+        "args": [{
+          "name": "kodi",
+          "type": "device",
+          "filter": "driver_uri=homey:app:nl.marvinschenkel.kodi&driver_id=kodi"
+        }]
       },
       {
         "id": "shutdown_kodi",
         "title": {
-          "en" : "Shutdown Kodi",
-          "nl" : "Sluit Kodi af"
+          "en": "Shutdown Kodi",
+          "nl": "Sluit Kodi af"
         },
         "fluidArgs": true,
-        "args":[
-          {
-            "name": "kodi",
-            "type": "device",
-            "filter": "driver_uri=homey:app:nl.marvinschenkel.kodi&driver_id=kodi"
-          }
-        ]
+        "args": [{
+          "name": "kodi",
+          "type": "device",
+          "filter": "driver_uri=homey:app:nl.marvinschenkel.kodi&driver_id=kodi"
+        }]
       },
       {
         "id": "mute_kodi",
         "title": {
-          "en" : "Mute Kodi",
-          "nl" : "Zet Kodi op mute"
+          "en": "Mute Kodi",
+          "nl": "Zet Kodi op mute"
         },
         "fluidArgs": true,
-        "args":[
-          {
-            "name": "kodi",
-            "type": "device",
-            "filter": "driver_uri=homey:app:nl.marvinschenkel.kodi&driver_id=kodi"
-          }
-        ]
+        "args": [{
+          "name": "kodi",
+          "type": "device",
+          "filter": "driver_uri=homey:app:nl.marvinschenkel.kodi&driver_id=kodi"
+        }]
       },
       {
         "id": "unmute_kodi",
         "title": {
-          "en" : "Unmute Kodi",
-          "nl" : "Zet Kodi op luid (unmute)"
+          "en": "Unmute Kodi",
+          "nl": "Zet Kodi op luid (unmute)"
         },
         "fluidArgs": true,
-        "args":[
-          {
-            "name": "kodi",
-            "type": "device",
-            "filter": "driver_uri=homey:app:nl.marvinschenkel.kodi&driver_id=kodi"
-          }
-        ]
+        "args": [{
+          "name": "kodi",
+          "type": "device",
+          "filter": "driver_uri=homey:app:nl.marvinschenkel.kodi&driver_id=kodi"
+        }]
       },
       {
         "id": "party_mode_kodi",
         "title": {
-          "en" : "Set music party mode on",
-          "nl" : "Zet party modus aan"
+          "en": "Set music party mode on",
+          "nl": "Zet party modus aan"
         },
         "fluidArgs": true,
-        "args":[
-          {
-            "name": "kodi",
-            "type": "device",
-            "filter": "driver_uri=homey:app:nl.marvinschenkel.kodi&driver_id=kodi"
-          }
-        ]
+        "args": [{
+          "name": "kodi",
+          "type": "device",
+          "filter": "driver_uri=homey:app:nl.marvinschenkel.kodi&driver_id=kodi"
+        }]
       },
       {
         "id": "subtitle_on",
         "title": {
-          "en" : "Turn subtitle on",
-          "nl" : "Zet ondertiteling aan"
+          "en": "Turn subtitle on",
+          "nl": "Zet ondertiteling aan"
         },
         "fluidArgs": true,
-        "args":[
-          {
-            "name": "kodi",
-            "type": "device",
-            "filter": "driver_uri=homey:app:nl.marvinschenkel.kodi&driver_id=kodi"
-          }
-        ]
+        "args": [{
+          "name": "kodi",
+          "type": "device",
+          "filter": "driver_uri=homey:app:nl.marvinschenkel.kodi&driver_id=kodi"
+        }]
       },
       {
         "id": "subtitle_off",
         "title": {
-          "en" : "Turn subtitle off",
-          "nl" : "Zet ondertiteling uit"
+          "en": "Turn subtitle off",
+          "nl": "Zet ondertiteling uit"
         },
         "fluidArgs": true,
-        "args":[
-          {
-            "name": "kodi",
-            "type": "device",
-            "filter": "driver_uri=homey:app:nl.marvinschenkel.kodi&driver_id=kodi"
-          }
-        ]
+        "args": [{
+          "name": "kodi",
+          "type": "device",
+          "filter": "driver_uri=homey:app:nl.marvinschenkel.kodi&driver_id=kodi"
+        }]
       }
     ]
-  }
-  ,
+  },
   "permissions": [
     "homey:manager:speech-output",
     "homey:manager:speech-input",

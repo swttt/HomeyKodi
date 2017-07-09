@@ -12,7 +12,7 @@ var registeredDevices = []
 var CONNECT_INTERVAL = 10000 // miliseconds
 
 // Init the logging
-console.log = function () {
+console.log = function() {
   // Save log message to settings
   // Retreive current logs
   let currentLogs = Homey.manager('settings').get('currentLogs')
@@ -20,10 +20,13 @@ console.log = function () {
 
   // Push new event, remove items over 50 and save new array. Use JSON Stringify to make sure objects are logged properly
   let logArguments = Array.from(arguments)
-  logArguments.forEach(function (part, index, theArray) {
+  logArguments.forEach(function(part, index, theArray) {
     theArray[index] = JSON.stringify(part)
   })
-  currentLogs.push({datetime: new Date(), message: logArguments.join(' ')})
+  currentLogs.push({
+    datetime: new Date(),
+    message: logArguments.join(' ')
+  })
   if (currentLogs.length > 50) currentLogs.splice(0, 1)
   Homey.manager('settings').set('currentLogs', currentLogs)
 
@@ -31,20 +34,20 @@ console.log = function () {
   this.apply(console, arguments)
 }.bind(console.log)
 
-module.exports.init = function (devices, callback) {
+module.exports.init = function(devices, callback) {
   // Initiate a Kodi instance for each registered device
-  devices.forEach(function (device) {
+  devices.forEach(function(device) {
     // Build Xbmc objects
-    module.exports.getSettings(device, function (err, settings) {
+    module.exports.getSettings(device, function(err, settings) {
       if (err) {
         callback(err, null)
       }
       // Try to connect and register device using websockets
       // Try to reconnect every 10sec
-      function reconnect () {
+      function reconnect() {
         console.log('Trying to reconnect')
         KodiWs(settings.host, settings.tcpport)
-          .then(function (connection) {
+          .then(function(connection) {
             // Keep track of device id
             connection.id = settings.host
             connection.tcpport = settings.tcpport
@@ -54,7 +57,7 @@ module.exports.init = function (devices, callback) {
             // Start listening for Kodi events
             startListeningForEvents(connection)
           })
-          .catch(function (err) {
+          .catch(function(err) {
             console.log('Stil cannot reconnect: ', err)
             setTimeout(reconnect, CONNECT_INTERVAL)
           })
@@ -68,48 +71,50 @@ module.exports.init = function (devices, callback) {
 }
 
 // Pairing functionality
-module.exports.pair = function (socket) {
+module.exports.pair = function(socket) {
   // Link the configure function to the front end
-  socket.on('configure_kodi', function (device, callback) {
+  socket.on('configure_kodi', function(device, callback) {
     // Check if the device has already been added
-    if (registeredDevices.some(function (item) { return item.id === device.settings.host })) {
+    if (registeredDevices.some(function(item) {
+        return item.id === device.settings.host
+      })) {
       callback(__('pair.feedback.device_already_exists'))
     } else {
       // Try to connect and register device
       KodiWs(device.settings.host, device.settings.tcpport)
-      .then(function (connection) {
-        // Keep track of device id
-        connection.id = device.settings.host
-        connection.tcpport = device.settings.tcpport
-        connection.device_data = device.data
-        // Register the device
-        registeredDevices.push(connection)
-        // Start listening for Kodi events
-        startListeningForEvents(connection)
-        callback(null, __('pair.feedback.succesfully_connected'))
-      })
-      .catch(function (err) {
-        callback(__('pair.feedback.could_not_connect') + ' ' + err)
-      })
+        .then(function(connection) {
+          // Keep track of device id
+          connection.id = device.settings.host
+          connection.tcpport = device.settings.tcpport
+          connection.device_data = device.data
+          // Register the device
+          registeredDevices.push(connection)
+          // Start listening for Kodi events
+          startListeningForEvents(connection)
+          callback(null, __('pair.feedback.succesfully_connected'))
+        })
+        .catch(function(err) {
+          callback(__('pair.feedback.could_not_connect') + ' ' + err)
+        })
     }
   })
 
-  socket.on('disconnect', function () {
+  socket.on('disconnect', function() {
     // Don't care what happens
   })
 }
 
 // Device gets deleted
-module.exports.deleted = function (device_data) {
+module.exports.deleted = function(device_data) {
   unregisterDevice(device_data.id)
 }
 
 // A user has updated settings, update the device object
-module.exports.settings = function (device_data, newSettingsObj, oldSettingsObj, changedKeysArr, callback) {
+module.exports.settings = function(device_data, newSettingsObj, oldSettingsObj, changedKeysArr, callback) {
   console.log('Updating device', device_data.id, 'to', newSettingsObj.host, newSettingsObj.tcpport)
   // If we can connect using the new settings
   KodiWs(newSettingsObj.host, newSettingsObj.tcpport)
-    .then(function (connection) {
+    .then(function(connection) {
       // Create a new array without the updated device
       unregisterDevice(device_data.id)
       // Keep track of the device id and port
@@ -121,10 +126,10 @@ module.exports.settings = function (device_data, newSettingsObj, oldSettingsObj,
       // Start listening for Kodi events
       startListeningForEvents(connection)
     })
-    .then(function () {
+    .then(function() {
       callback(null, __('pair.feedback.succesfully_connected'))
     })
-    .catch(function (err) {
+    .catch(function(err) {
       callback(__('pair.feedback.could_not_connect') + ' ' + err)
     })
 }
@@ -135,16 +140,16 @@ module.exports.settings = function (device_data, newSettingsObj, oldSettingsObj,
 /* **********************************
   SEARCH MOVIE
 ************************************/
-module.exports.searchMovie = function (deviceSearchParameters, movieTitle) {
-  return new Promise(function (resolve, reject) {
+module.exports.searchMovie = function(deviceSearchParameters, movieTitle) {
+  return new Promise(function(resolve, reject) {
     console.log('searchMovie()', deviceSearchParameters, movieTitle)
 
     // search Kodi instance by deviceSearchParameters
     getKodiInstance(deviceSearchParameters)
-      .then(function (kodi) {
+      .then(function(kodi) {
         // Kodi API: VideoLibrary.GetMovies
         kodi.run('VideoLibrary.GetMovies', {})
-          .then(function (result) {
+          .then(function(result) {
             if (result.movies) { // Check if there are movies in the media library
               // Parse the result and look for movieTitle
               // Set option for fuzzy search
@@ -182,13 +187,13 @@ module.exports.searchMovie = function (deviceSearchParameters, movieTitle) {
 /* **********************************
   PLAY MOVIE
 ************************************/
-module.exports.playMovie = function (deviceSearchParameters, movieId) {
+module.exports.playMovie = function(deviceSearchParameters, movieId) {
   // Kodi API: Player.Open
-  return new Promise(function (resolve, reject) {
+  return new Promise(function(resolve, reject) {
     console.log('playMovie()', deviceSearchParameters, movieId)
     // search Kodi instance by deviceSearchParameters
     getKodiInstance(deviceSearchParameters)
-      .then(function (kodi) {
+      .then(function(kodi) {
         // Build the parameter to play a movie
         var param = {
           item: {
@@ -197,7 +202,7 @@ module.exports.playMovie = function (deviceSearchParameters, movieId) {
         }
 
         kodi.run('Player.Open', param)
-          .then(function () {
+          .then(function() {
             resolve(kodi)
           })
       })
@@ -208,23 +213,23 @@ module.exports.playMovie = function (deviceSearchParameters, movieId) {
 /* **********************************
   PLAY PAUSE
 ************************************/
-module.exports.playPause = function (deviceSearchParameters) {
+module.exports.playPause = function(deviceSearchParameters) {
   // Kodi API: Player.Open
-  return new Promise(function (resolve, reject) {
+  return new Promise(function(resolve, reject) {
     console.log('playPause()', deviceSearchParameters)
     // search Kodi instance by deviceSearchParameters
     getKodiInstance(deviceSearchParameters)
-      .then(function (kodi) {
+      .then(function(kodi) {
         // Get the active player so we can pause it
         kodi.run('Player.GetActivePlayers', {})
-          .then(function (result) {
+          .then(function(result) {
             if (result[0]) { // Check whether there is an active player to stop
               // Build request parameters and supply the player
               var param = {
                 playerid: result[0].playerid
               }
               kodi.run('Player.PlayPause', param)
-                .then(function (result) {
+                .then(function(result) {
                   var newState = result.speed === 0 ? 'paused' : 'resumed'
                   // Paused succesfully, return the new state and the device that has been paused
                   resolve(newState, kodi)
@@ -239,23 +244,23 @@ module.exports.playPause = function (deviceSearchParameters) {
 /* **********************************
   STOP
 ************************************/
-module.exports.stop = function (deviceSearchParameters) {
+module.exports.stop = function(deviceSearchParameters) {
   // Kodi API: Player.Open
-  return new Promise(function (resolve, reject) {
+  return new Promise(function(resolve, reject) {
     console.log('stop()', deviceSearchParameters)
     // search Kodi instance by deviceSearchParameters
     getKodiInstance(deviceSearchParameters)
-      .then(function (kodi) {
+      .then(function(kodi) {
         // Get the active player so we can pause it
         kodi.run('Player.GetActivePlayers', {})
-          .then(function (result) {
+          .then(function(result) {
             if (result[0]) { // Check whether there is an active player to stop
               // Build request parameters and supply the player
               var param = {
                 playerid: result[0].playerid
               }
               kodi.run('Player.Stop', param)
-                .then(function (result) {
+                .then(function(result) {
                   // Stopped succesfully, return the device that has been stopped
                   resolve(kodi)
                 })
@@ -269,13 +274,13 @@ module.exports.stop = function (deviceSearchParameters) {
 /* **********************************
   SEARCH MUSIC
 ************************************/
-module.exports.searchMusic = function (deviceSearchParameters, queryProperty, searchQuery) {
-  return new Promise(function (resolve, reject) {
+module.exports.searchMusic = function(deviceSearchParameters, queryProperty, searchQuery) {
+  return new Promise(function(resolve, reject) {
     console.log('searchMusic()', deviceSearchParameters, queryProperty, searchQuery)
 
     // search Kodi instance by deviceSearchParameters
     getKodiInstance(deviceSearchParameters)
-      .then(function (kodi) {
+      .then(function(kodi) {
         // Determine whether to search by artist or ALBUM
         var searchMethod = ''
         var fuzzyLookupKey = ''
@@ -291,7 +296,7 @@ module.exports.searchMusic = function (deviceSearchParameters, queryProperty, se
         // Call kodi for artist / albums
         kodi.run(searchMethod, {})
           .then(
-            function (result) {
+            function(result) {
               if (result[fuzzyLookupKey + 's']) { // Check if there is music in the library
                 // Parse the result and look for artist or album
                 // Set option for fuzzy search
@@ -315,12 +320,14 @@ module.exports.searchMusic = function (deviceSearchParameters, queryProperty, se
                   var artistOrAlbum = searchResult[0] // Always use searchResult[0], this is the result with the highest probability (setting shouldSort = true)
 
                   // Build parameter filter to obtain filtered songs
-                  var params = { filter: {} }
+                  var params = {
+                    filter: {}
+                  }
                   params.filter[fuzzyLookupKey + 'id'] = artistOrAlbum.artistid
 
                   // Call Kodi for songs by artist/albums
                   kodi.run('AudioLibrary.GetSongs', params)
-                    .then(function (result) {
+                    .then(function(result) {
                       // Return the array of songs
                       resolve(result.songs)
                     })
@@ -340,7 +347,7 @@ module.exports.searchMusic = function (deviceSearchParameters, queryProperty, se
                 reject(__('talkback.no_music_in_library'))
               }
             }
-        )
+          )
       })
       .catch(reject)
   })
@@ -354,22 +361,24 @@ module.exports.searchMusic = function (deviceSearchParameters, queryProperty, se
   - Adds songs
   - Starts playing
 */
-module.exports.playMusic = function (deviceSearchParameters, songsToPlay, shuffle) {
-  return new Promise(function (resolve, reject) {
+module.exports.playMusic = function(deviceSearchParameters, songsToPlay, shuffle) {
+  return new Promise(function(resolve, reject) {
     console.log('playMusic()', deviceSearchParameters, songsToPlay)
 
     // search Kodi instance by deviceSearchParameters
     getKodiInstance(deviceSearchParameters)
-      .then(function (kodi) {
+      .then(function(kodi) {
         // Clear the playlist
         var params = {
           playlistid: 0
         }
         kodi.run('Playlist.Clear', params)
-          .then(function () {
+          .then(function() {
             // Create an array of songids
-            var songs = songsToPlay.map(function (item) {
-              return {songid: item.songid}
+            var songs = songsToPlay.map(function(item) {
+              return {
+                songid: item.songid
+              }
             })
 
             // Shuffle the array
@@ -383,7 +392,7 @@ module.exports.playMusic = function (deviceSearchParameters, songsToPlay, shuffl
             }
             // Add the songs to the playlist
             kodi.run('Playlist.Add', params)
-              .then(function (result) {
+              .then(function(result) {
                 // Play the playlist
                 var params = {
                   item: {
@@ -395,7 +404,7 @@ module.exports.playMusic = function (deviceSearchParameters, songsToPlay, shuffl
                 }
 
                 kodi.run('Player.Open', params)
-                  .then(function (result) {
+                  .then(function(result) {
                     // Succesfully played the playlist, return the device for flow handling
                     resolve(kodi)
                   })
@@ -408,16 +417,16 @@ module.exports.playMusic = function (deviceSearchParameters, songsToPlay, shuffl
 /* **********************************
   NEXT / PREVIOUS TRACK
 ************************************/
-module.exports.nextOrPreviousTrack = function (deviceSearchParameters, previousOrNext) {
-  return new Promise(function (resolve, reject) {
+module.exports.nextOrPreviousTrack = function(deviceSearchParameters, previousOrNext) {
+  return new Promise(function(resolve, reject) {
     console.log('nextOrPreviousTrack()', deviceSearchParameters, previousOrNext)
 
     // search Kodi instance by deviceSearchParameters
     getKodiInstance(deviceSearchParameters)
-      .then(function (kodi) {
+      .then(function(kodi) {
         // Get the active player so we can next/previous it
         kodi.run('Player.GetActivePlayers', {})
-          .then(function (result) {
+          .then(function(result) {
             if (result[0]) { // Check whether there is an active player to stop
               // Build request parameters and supply the player
               var params = {
@@ -426,7 +435,7 @@ module.exports.nextOrPreviousTrack = function (deviceSearchParameters, previousO
               }
 
               kodi.run('Player.GoTo', params)
-                .then(function (result) {
+                .then(function(result) {
                   resolve(previousOrNext)
                 })
             }
@@ -438,16 +447,16 @@ module.exports.nextOrPreviousTrack = function (deviceSearchParameters, previousO
 /* **********************************
   SEARCH LATEST EPISODE
 ************************************/
-module.exports.getLatestEpisode = function (deviceSearchParameters, seriesName) {
-  return new Promise(function (resolve, reject) {
+module.exports.getLatestEpisode = function(deviceSearchParameters, seriesName) {
+  return new Promise(function(resolve, reject) {
     console.log('getLatestEpisode()', deviceSearchParameters, seriesName)
 
     // search Kodi instance by deviceSearchParameters
     getKodiInstance(deviceSearchParameters)
-      .then(function (kodi) {
+      .then(function(kodi) {
         // Get all the series and fuzzy search for the one we need
         kodi.run('VideoLibrary.GetTVShows', {})
-          .then(function (result) {
+          .then(function(result) {
             if (result.tvshows) { // Check whether there are TV shows in the library
               // Parse the result and look for movieTitle
               // Set option for fuzzy search
@@ -483,11 +492,11 @@ module.exports.getLatestEpisode = function (deviceSearchParameters, seriesName) 
                   }
                 }
                 kodi.run('VideoLibrary.GetEpisodes', param)
-                  .then(function (result) {
+                  .then(function(result) {
                     // Check if there are episodes for this TV show
                     if (result.episodes) {
                       // Check whether we have seen this episode already
-                      var firstUnplayedEpisode = result.episodes.filter(function (item) {
+                      var firstUnplayedEpisode = result.episodes.filter(function(item) {
                         return item.playcount === 0
                       })
                       if (firstUnplayedEpisode.length > 0) {
@@ -514,13 +523,13 @@ module.exports.getLatestEpisode = function (deviceSearchParameters, seriesName) 
 /* **********************************
   PLAY EPISODE
 ************************************/
-module.exports.playEpisode = function (deviceSearchParameters, episode) {
+module.exports.playEpisode = function(deviceSearchParameters, episode) {
   // Kodi API: Player.Open
-  return new Promise(function (resolve, reject) {
+  return new Promise(function(resolve, reject) {
     console.log('playEpisode()', deviceSearchParameters, episode)
     // search Kodi instance by searchParameters
     getKodiInstance(deviceSearchParameters)
-      .then(function (kodi) {
+      .then(function(kodi) {
         // Build the parameter to play a movie
         var param = {
           item: {
@@ -529,7 +538,7 @@ module.exports.playEpisode = function (deviceSearchParameters, episode) {
         }
 
         kodi.run('Player.Open', param)
-          .then(function (result) {
+          .then(function(result) {
             // Episode started playing succesfully, return device for flow handling
             resolve(kodi)
           })
@@ -541,19 +550,19 @@ module.exports.playEpisode = function (deviceSearchParameters, episode) {
 /* **********************************
   SEARCH ADDON
 ************************************/
-module.exports.searchAddon = function (deviceSearchParameters, addonName) {
-  return new Promise(function (resolve, reject) {
+module.exports.searchAddon = function(deviceSearchParameters, addonName) {
+  return new Promise(function(resolve, reject) {
     console.log('searchAddon()', deviceSearchParameters, addonName)
 
     // search Kodi instance by deviceSearchParameters
     getKodiInstance(deviceSearchParameters)
-      .then(function (kodi) {
+      .then(function(kodi) {
         var params = {
           properties: ['name']
         }
         // Get all the addons and fuzzy search for the one we need
         kodi.run('Addons.GetAddons', params)
-          .then(function (result) {
+          .then(function(result) {
             if (result.addons) { // Check whether there are TV shows in the library
               // Parse the result and look for movieTitle
               // Set option for fuzzy search
@@ -590,23 +599,23 @@ module.exports.searchAddon = function (deviceSearchParameters, addonName) {
 /* **********************************
   START ADDON
 ************************************/
-module.exports.startAddon = function (deviceSearchParameters, addonId) {
+module.exports.startAddon = function(deviceSearchParameters, addonId) {
   // Kodi API: Addons.ExecuteAddon
-  return new Promise(function (resolve, reject) {
+  return new Promise(function(resolve, reject) {
     console.log('startAddon()', deviceSearchParameters, addonId)
     // search Kodi instance by deviceSearchParameters
     getKodiInstance(deviceSearchParameters)
-      .then(function (kodi) {
+      .then(function(kodi) {
         // Build the parameter to start the addon
         var param = {
           addonid: addonId
         }
 
         kodi.run('Addons.ExecuteAddon', param)
-          .then(function (result) {
+          .then(function(result) {
             resolve(kodi)
           })
-          .catch(function (err) {
+          .catch(function(err) {
             console.log('err', err)
           })
       })
@@ -617,15 +626,15 @@ module.exports.startAddon = function (deviceSearchParameters, addonId) {
 /* **********************************
   GET LATEST MOVIES
 ************************************/
-module.exports.getNewestMovies = function (deviceSearchParameters, daysSince) {
-  return new Promise(function (resolve, reject) {
+module.exports.getNewestMovies = function(deviceSearchParameters, daysSince) {
+  return new Promise(function(resolve, reject) {
     console.log('getNewestMovies()', deviceSearchParameters, daysSince)
     // Calculate cutoff date to check for new movies
     let dateSince = new Date()
     dateSince.setDate(dateSince.getDate() - daysSince)
     // search Kodi instance by deviceSearchParameters
     getKodiInstance(deviceSearchParameters)
-      .then(function (kodi) {
+      .then(function(kodi) {
         let params = {
           filter: {
             operator: 'greaterthan',
@@ -636,7 +645,7 @@ module.exports.getNewestMovies = function (deviceSearchParameters, daysSince) {
 
         // Kodi API: VideoLibrary.GetMovies
         kodi.run('VideoLibrary.GetMovies', params)
-          .then(function (result) {
+          .then(function(result) {
             if (result.movies) { // Check if there are movies in the media library
               resolve(result.movies)
             } else {
@@ -652,15 +661,15 @@ module.exports.getNewestMovies = function (deviceSearchParameters, daysSince) {
 /* **********************************
   GET LATEST EPISODES
 ************************************/
-module.exports.getNewestEpisodes = function (deviceSearchParameters, daysSince) {
-  return new Promise(function (resolve, reject) {
+module.exports.getNewestEpisodes = function(deviceSearchParameters, daysSince) {
+  return new Promise(function(resolve, reject) {
     console.log('getNewestEpisodes()', deviceSearchParameters, daysSince)
     // Calculate cutoff date to check for new Episodes
     let dateSince = new Date()
     dateSince.setDate(dateSince.getDate() - daysSince)
     // search Kodi instance by deviceSearchParameters
     getKodiInstance(deviceSearchParameters)
-      .then(function (kodi) {
+      .then(function(kodi) {
         let params = {
           filter: {
             operator: 'greaterthan',
@@ -672,7 +681,7 @@ module.exports.getNewestEpisodes = function (deviceSearchParameters, daysSince) 
 
         // Kodi API: VideoLibrary.GetEpisodes
         kodi.run('VideoLibrary.GetEpisodes', params)
-          .then(function (result) {
+          .then(function(result) {
             if (result.episodes) { // Check if there are episodes in the media library
               resolve(result.episodes)
             } else {
@@ -688,13 +697,13 @@ module.exports.getNewestEpisodes = function (deviceSearchParameters, daysSince) 
 /* **********************************
   SET PARTY MODE
 ************************************/
-module.exports.setPartyMode = function (deviceSearchParameters, onOff) {
+module.exports.setPartyMode = function(deviceSearchParameters, onOff) {
   // Kodi API: System.Hibernate
-  return new Promise(function (resolve, reject) {
+  return new Promise(function(resolve, reject) {
     console.log('setPartyMode(' + onOff + ')', deviceSearchParameters)
     // search Kodi instance by searchParameters
     getKodiInstance(deviceSearchParameters)
-      .then(function (kodi) {
+      .then(function(kodi) {
         let params = {
           item: {
             'partymode': 'music'
@@ -702,9 +711,11 @@ module.exports.setPartyMode = function (deviceSearchParameters, onOff) {
         }
 
         kodi.run('Player.Open', params)
-          .then(function (result) {
+          .then(function(result) {
             resolve(kodi)
-          }).catch(function (err) { console.log(err) })
+          }).catch(function(err) {
+            console.log(err)
+          })
       })
       .catch(reject)
   })
@@ -712,15 +723,15 @@ module.exports.setPartyMode = function (deviceSearchParameters, onOff) {
 /* **********************************
   SYSTEM FUNCTIONS
 ************************************/
-module.exports.shutdownKodi = function (deviceSearchParameters) {
+module.exports.shutdownKodi = function(deviceSearchParameters) {
   // Kodi API: System.Shutdown
-  return new Promise(function (resolve, reject) {
+  return new Promise(function(resolve, reject) {
     console.log('shutdownKodi()', deviceSearchParameters)
     // search Kodi instance by searchParameters
     getKodiInstance(deviceSearchParameters)
-      .then(function (kodi) {
+      .then(function(kodi) {
         kodi.run('System.Shutdown')
-          .then(function (result) {
+          .then(function(result) {
             resolve(kodi)
           })
       })
@@ -728,15 +739,15 @@ module.exports.shutdownKodi = function (deviceSearchParameters) {
   })
 }
 
-module.exports.rebootKodi = function (deviceSearchParameters) {
+module.exports.rebootKodi = function(deviceSearchParameters) {
   // Kodi API: System.Reboot
-  return new Promise(function (resolve, reject) {
+  return new Promise(function(resolve, reject) {
     console.log('rebootKodi()', deviceSearchParameters)
     // search Kodi instance by searchParameters
     getKodiInstance(deviceSearchParameters)
-      .then(function (kodi) {
+      .then(function(kodi) {
         kodi.run('System.Reboot')
-          .then(function (result) {
+          .then(function(result) {
             resolve(kodi)
           })
       })
@@ -744,15 +755,15 @@ module.exports.rebootKodi = function (deviceSearchParameters) {
   })
 }
 
-module.exports.hibernateKodi = function (deviceSearchParameters) {
+module.exports.hibernateKodi = function(deviceSearchParameters) {
   // Kodi API: System.Hibernate
-  return new Promise(function (resolve, reject) {
+  return new Promise(function(resolve, reject) {
     console.log('hibernateKodi()', deviceSearchParameters)
     // search Kodi instance by searchParameters
     getKodiInstance(deviceSearchParameters)
-      .then(function (kodi) {
+      .then(function(kodi) {
         kodi.run('System.Hibernate')
-          .then(function (result) {
+          .then(function(result) {
             resolve(kodi)
           })
       })
@@ -760,15 +771,15 @@ module.exports.hibernateKodi = function (deviceSearchParameters) {
   })
 }
 
-module.exports.muteKodi = function (deviceSearchParameters) {
+module.exports.muteKodi = function(deviceSearchParameters) {
   // Kodi API: System.Hibernate
-  return new Promise(function (resolve, reject) {
+  return new Promise(function(resolve, reject) {
     console.log('muteKodi()', deviceSearchParameters)
     // search Kodi instance by searchParameters
     getKodiInstance(deviceSearchParameters)
-      .then(function (kodi) {
+      .then(function(kodi) {
         kodi.run('Application.SetMute', true)
-          .then(function (result) {
+          .then(function(result) {
             resolve(kodi)
           })
       })
@@ -776,15 +787,15 @@ module.exports.muteKodi = function (deviceSearchParameters) {
   })
 }
 
-module.exports.unmuteKodi = function (deviceSearchParameters) {
+module.exports.unmuteKodi = function(deviceSearchParameters) {
   // Kodi API: System.Hibernate
-  return new Promise(function (resolve, reject) {
+  return new Promise(function(resolve, reject) {
     console.log('muteKodi()', deviceSearchParameters)
     // search Kodi instance by searchParameters
     getKodiInstance(deviceSearchParameters)
-      .then(function (kodi) {
+      .then(function(kodi) {
         kodi.run('Application.SetMute', false)
-          .then(function (result) {
+          .then(function(result) {
             resolve(kodi)
           })
       })
@@ -792,16 +803,16 @@ module.exports.unmuteKodi = function (deviceSearchParameters) {
   })
 }
 
-module.exports.setSubtitle = function (deviceSearchParameters, subsitleOnOff) {
+module.exports.setSubtitle = function(deviceSearchParameters, subsitleOnOff) {
   // Kodi API: System.Hibernate
-  return new Promise(function (resolve, reject) {
+  return new Promise(function(resolve, reject) {
     console.log('setSubtitle(' + subsitleOnOff + ')', deviceSearchParameters)
     // search Kodi instance by searchParameters
     getKodiInstance(deviceSearchParameters)
-      .then(function (kodi) {
+      .then(function(kodi) {
         // Get the active player so we can set the subtitle
         kodi.run('Player.GetActivePlayers', {})
-          .then(function (result) {
+          .then(function(result) {
             if (result[0]) { // Check whether there is an active player to set the subtitle
               // Build request parameters and supply the player
               let params = {
@@ -809,9 +820,9 @@ module.exports.setSubtitle = function (deviceSearchParameters, subsitleOnOff) {
                 subtitle: subsitleOnOff
               }
               kodi.run('Player.SetSubtitle', params)
-              .then(function (result) {
-                resolve(kodi)
-              })
+                .then(function(result) {
+                  resolve(kodi)
+                })
             }
           })
       })
@@ -819,36 +830,56 @@ module.exports.setSubtitle = function (deviceSearchParameters, subsitleOnOff) {
   })
 }
 
-module.exports.setVolume = function (deviceSearchParameters, volume) {
+module.exports.setVolume = function(deviceSearchParameters, volume) {
   // Kodi API: System.Hibernate
-  return new Promise(function (resolve, reject) {
+  return new Promise(function(resolve, reject) {
     console.log('setVolume(' + volume + ')', deviceSearchParameters)
     // search Kodi instance by searchParameters
     getKodiInstance(deviceSearchParameters)
-      .then(function (kodi) {
+      .then(function(kodi) {
         let params = {
           volume: volume
         }
         kodi.run('Application.SetVolume', params)
-          .then(function (result) {
+          .then(function(result) {
             resolve(kodi)
           })
       })
       .catch(reject)
   })
 }
+
+module.exports.sendNotification = function(deviceSearchParameters, message) {
+  return new Promise(function(resolve, reject) {
+    console.log('sendNotification(' + message + ')', deviceSearchParameters)
+    // search Kodi instance by searchParameters
+    getKodiInstance(deviceSearchParameters)
+      .then(function(kodi) {
+        let params = {
+          title: 'Homey',
+          message: message
+        }
+        kodi.run('GUI.ShowNotification', params)
+          .then(function(result) {
+            resolve(kodi)
+          })
+      })
+      .catch(reject)
+  })
+}
+
 /* **********************************
   GENERIC FUNCTIONS
 ************************************/
-function deleteDevice (deviceId) {
-  registeredDevices = registeredDevices.filter(function (item) {
+function deleteDevice(deviceId) {
+  registeredDevices = registeredDevices.filter(function(item) {
     return item.id !== deviceId
   })
 }
 
-function unregisterDevice (deviceId) {
+function unregisterDevice(deviceId) {
   // Lookup the device
-  let device = registeredDevices.filter(function (item) {
+  let device = registeredDevices.filter(function(item) {
     return item.id === deviceId
   })[0]
   // Delete the reconnect timer
@@ -862,8 +893,8 @@ function unregisterDevice (deviceId) {
 }
 
 // Return the Kodi device specified by the search parameters
-function getKodiInstance (searchParameters) {
-  return new Promise(function (resolve, reject) {
+function getKodiInstance(searchParameters) {
+  return new Promise(function(resolve, reject) {
     console.log('getKodiInstance', searchParameters)
     // If only 1 registered device, just return it
     let device = null
@@ -871,7 +902,7 @@ function getKodiInstance (searchParameters) {
       device = registeredDevices[0]
     } else {
       // Search parameters have been provided, look for a device with the supplied ID
-      device = registeredDevices.filter(function (item) {
+      device = registeredDevices.filter(function(item) {
         return item.id === searchParameters
       })[0]
     }
@@ -887,18 +918,32 @@ function getKodiInstance (searchParameters) {
   KODI EVENT LISTENERS
     - All functions related to event handling
 ************************************/
-function startListeningForEvents (device) {
+function startListeningForEvents(device) {
   console.log('startListeningForEvents(' + device.id + ')')
   // Map supported Kodi events to indidual functions and pass the device connection to trigger the appropriate flows
-  device.notification('Player.OnPause', function (result) { onKodiGenericEvent(result, device, 'kodi_pause') })
-  device.notification('Player.OnPlay', function (result) { onKodiPlay(result, device) })
-  device.notification('Player.OnStop', function (result) { onKodiStop(result, device, 'kodi_stop') })
-  device.notification('System.OnQuit', function (result) { onKodiGenericEvent(result, device, 'kodi_shutdown') })
-  device.notification('System.OnSleep', function (result) { onKodiGenericEvent(result, device, 'kodi_hibernate') })
-  device.notification('System.OnRestart', function (result) { onKodiGenericEvent(result, device, 'kodi_reboot') })
-  device.notification('System.OnWake', function (result) { onKodiGenericEvent(result, device, 'kodi_wake') })
+  device.notification('Player.OnPause', function(result) {
+    onKodiGenericEvent(result, device, 'kodi_pause')
+  })
+  device.notification('Player.OnPlay', function(result) {
+    onKodiPlay(result, device)
+  })
+  device.notification('Player.OnStop', function(result) {
+    onKodiStop(result, device, 'kodi_stop')
+  })
+  device.notification('System.OnQuit', function(result) {
+    onKodiGenericEvent(result, device, 'kodi_shutdown')
+  })
+  device.notification('System.OnSleep', function(result) {
+    onKodiGenericEvent(result, device, 'kodi_hibernate')
+  })
+  device.notification('System.OnRestart', function(result) {
+    onKodiGenericEvent(result, device, 'kodi_reboot')
+  })
+  device.notification('System.OnWake', function(result) {
+    onKodiGenericEvent(result, device, 'kodi_wake')
+  })
   // Catch error when Kodi suddenly goes offline to prevent the app from crashing
-  device.on('error', function (error) {
+  device.on('error', function(error) {
     console.log('Kodi connection error: ', error)
 
     // Delete the device details from Homey
@@ -908,7 +953,7 @@ function startListeningForEvents (device) {
   })
 
   // Keep track of connection loss
-  device.on('close', function () {
+  device.on('close', function() {
     console.log('Connection closed')
     // Delete the device details from Homey
     deleteDevice(device.id)
@@ -918,11 +963,11 @@ function startListeningForEvents (device) {
 }
 
 // Try to reconnect every 10sec
-function pollReconnect (device) {
-  function reconnect () {
+function pollReconnect(device) {
+  function reconnect() {
     console.log('Trying to reconnect')
     KodiWs(device.id, device.tcpport)
-      .then(function (connection) {
+      .then(function(connection) {
         // Keep track of device id
         connection.id = device.id
         connection.tcpport = device.tcpport
@@ -935,7 +980,7 @@ function pollReconnect (device) {
         // Trigger kodi reconnect flow
         Homey.manager('flow').triggerDevice('kodi_reconnects', null, null, device.device_data)
       })
-      .catch(function (err) {
+      .catch(function(err) {
         console.log('Stil cannot reconnect: ', err)
         device.reconnectTimer = setTimeout(reconnect, CONNECT_INTERVAL)
       })
@@ -946,14 +991,14 @@ function pollReconnect (device) {
   }
 }
 
-function onKodiGenericEvent (result, device, triggerName) {
+function onKodiGenericEvent(result, device, triggerName) {
   console.log('onKodiGenericEvent() ', triggerName)
   // Trigger the flow
   console.log('Triggering flow ', triggerName, ' for(' + device.id + ')')
   Homey.manager('flow').triggerDevice(triggerName, null, null, device.device_data)
 }
 
-function onKodiStop (result, device) {
+function onKodiStop(result, device) {
   console.log('onKodiStop(' + device.id + ')')
   console.log('Triggering flow ', 'kodi_stop')
   Homey.manager('flow').triggerDevice('kodi_stop', null, null, device.device_data)
@@ -967,7 +1012,7 @@ function onKodiStop (result, device) {
         properties: ['showtitle', 'season', 'episode', 'title']
       }
       device.run('VideoLibrary.GetEpisodeDetails', episodeParams)
-        .then(function (episodeResult) {
+        .then(function(episodeResult) {
           // Trigger action kodi_episode_start
           Homey.log('Triggering flow kodi_episode_stop (' + device.id + '), tvshow_title: ', episodeResult.episodedetails.showtitle, 'episode_title: ', episodeResult.episodedetails.label, 'season: ', episodeResult.episodedetails.season, 'episode: ', episodeResult.episodedetails.episode)
           Homey.manager('flow').triggerDevice('kodi_episode_stop', {
@@ -985,7 +1030,7 @@ function onKodiStop (result, device) {
       }
       // Else get the title by id
       device.run('VideoLibrary.GetMovieDetails', movieParams)
-        .then(function (movieResult) {
+        .then(function(movieResult) {
           // Trigger appropriate flows
           Homey.log('Triggering flow kodi_movie_stop(' + device.id + '), movie_title: ', movieResult.moviedetails.label, 'device: ', device.device_data)
           // Trigger flows and pass variables
@@ -998,7 +1043,7 @@ function onKodiStop (result, device) {
   }
 }
 
-function onKodiPlay (result, device) {
+function onKodiPlay(result, device) {
   console.log('onKodiPlay(' + device.id + ')')
   // Throw a 'anything started playing' event
   console.log('Triggering flow kodi_playing_something')
@@ -1012,7 +1057,7 @@ function onKodiPlay (result, device) {
     properties: ['percentage']
   }
   device.run('Player.GetProperties', params)
-    .then(function (playerResult) {
+    .then(function(playerResult) {
       // If the percentage is above 0.1 for eps/movies or above 1  for songs , we have a resume-action
       if (playerResult) {
         if ((playerResult.percentage >= 0.1 && result.data.item.type !== 'song') || (playerResult.percentage >= 1 && result.data.item.type === 'song')) {
@@ -1020,7 +1065,9 @@ function onKodiPlay (result, device) {
           Homey.manager('flow').triggerDevice('kodi_resume', null, null, device.device_data)
         } else {
           // Get the current item from the Player to check whether we are dealing with a movie or an episode
-          device.run('Player.GetItem', { playerid: playerId }).then(function (resultGetItem) {
+          device.run('Player.GetItem', {
+            playerid: playerId
+          }).then(function(resultGetItem) {
             // Check if we're dealing with a movie, episode or song
             if (resultGetItem.item.type === 'movie' || resultGetItem.item.type === 'movies') {
               let movieTitle = (resultGetItem.item.label) ? resultGetItem.item.label : ''
@@ -1030,14 +1077,14 @@ function onKodiPlay (result, device) {
               }
               // Else get the title by id
               device.run('VideoLibrary.GetMovieDetails', movieParams)
-                .then(function (movieResult) {
+                .then(function(movieResult) {
                   console.log('movieresult', movieResult)
                   movieTitle = (movieResult.moviedetails.label) ? movieResult.moviedetails.label : movieTitle
                 })
                 .catch((err) => {
                   console.log(err)
                 })
-                .then(function () {
+                .then(function() {
                   console.log('MT', movieTitle)
                   if (movieTitle !== '') {
                     // Trigger appropriate flows
@@ -1061,14 +1108,16 @@ function onKodiPlay (result, device) {
                 properties: ['showtitle', 'season', 'episode', 'title']
               }
               device.run('VideoLibrary.GetEpisodeDetails', episodeParams)
-                .then(function (episodeResult) {
+                .then(function(episodeResult) {
                   tvshowTitle = (episodeResult.episodedetails.showtitle) ? episodeResult.episodedetails.showtitle : tvshowTitle
                   episodeTitle = (episodeResult.episodedetails.label) ? episodeResult.episodedetails.label : episodeTitle
                   season = (episodeResult.episodedetails.season) ? episodeResult.episodedetails.season : season
                   episode = (episodeResult.episodedetails.episode) ? episodeResult.episodedetails.episode : episode
                 })
-                .catch((err) => { console.log(err) })
-                .then(function () {
+                .catch((err) => {
+                  console.log(err)
+                })
+                .then(function() {
                   if (tvshowTitle !== '' && episodeTitle !== '') {
                     // Trigger action kodi_episode_start
                     Homey.log('Triggering flow kodi_episode_start, tvshow_title: ', tvshowTitle, 'episode_title: ', episodeTitle, 'season: ', season, 'episode: ', episode)
@@ -1087,17 +1136,19 @@ function onKodiPlay (result, device) {
                 properties: ['artist', 'title']
               }
               device.run('AudioLibrary.GetSongDetails', songParams)
-                .then(function (songResult) {
+                .then(function(songResult) {
                   // Trigger action kodi_song_start
                   Homey.log('Triggering flow kodi_song_start, artist: ', songResult.songdetails.artist[0], 'title: ', songResult.songdetails.title)
                   Homey.manager('flow').triggerDevice('kodi_song_start', {
                     artist: songResult.songdetails.artist[0],
                     song_title: songResult.songdetails.title
                   }, null, device.device_data)
-                }).catch(function (err) { console.log(err) })
+                }).catch(function(err) {
+                  console.log(err)
+                })
             }
           })
-        } 
+        }
       }
     })
 }
